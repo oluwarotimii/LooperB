@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupSwagger } from "./swagger";
 import { userService } from "./services/userService";
 import { businessService } from "./services/businessService";
 import { listingService } from "./services/listingService";
@@ -18,10 +19,38 @@ import { requireBusinessAccess, requireRole } from "./middleware/auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Swagger documentation
+  setupSwagger(app);
+
   // Auth middleware
   await setupAuth(app);
 
   // Auth routes
+  /**
+   * @swagger
+   * /api/auth/user:
+   *   get:
+   *     summary: Get current authenticated user
+   *     description: Returns the profile information of the currently authenticated user
+   *     tags: [Authentication]
+   *     security:
+   *       - SessionAuth: []
+   *     responses:
+   *       200:
+   *         description: User profile retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/User'
+   *       401:
+   *         description: User not authenticated
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *       500:
+   *         description: Internal server error
+   */
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
