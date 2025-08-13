@@ -6,16 +6,27 @@ export class ListingService {
   async createListing(listingData: InsertFoodListing & { dietaryTagIds?: string[] }): Promise<FoodListing> {
     const { dietaryTagIds, ...listingInfo } = listingData;
     
+    // Calculate dynamic discounted price
+    const calculatedDiscountedPrice = this.calculateDynamicPrice(
+      parseFloat(listingInfo.originalPrice),
+      parseFloat(listingInfo.discountedPrice),
+      listingInfo.quantity,
+      listingInfo.minQuantityForDiscount || 1,
+      parseFloat(listingInfo.bulkDiscountPercentage || "0"),
+      new Date(listingInfo.pickupWindowEnd),
+      listingInfo.peakPricingRules
+    );
+
     // Set available quantity to initial quantity
     const listing = await storage.createFoodListing({
       ...listingInfo,
       availableQuantity: listingInfo.quantity,
+      discountedPrice: calculatedDiscountedPrice.toString(),
     });
 
     // Add dietary tags if provided
     if (dietaryTagIds && dietaryTagIds.length > 0) {
-      // This would require a method in storage to handle many-to-many relationships
-      // For now, we'll skip this implementation detail
+      await storage.addListingDietaryTags(listing.id, dietaryTagIds);
     }
 
     // Notify nearby users about new listing
@@ -34,6 +45,10 @@ export class ListingService {
 
   async searchListings(filters: any): Promise<FoodListing[]> {
     const searchFilters: any = {};
+
+    if (filters.q) {
+      return await storage.searchFoodListingsFullText(filters.q, filters);
+    }
 
     if (filters.maxPrice) {
       searchFilters.maxPrice = filters.maxPrice;
@@ -64,6 +79,31 @@ export class ListingService {
   }
 
   async updateListing(listingId: string, updates: Partial<FoodListing>): Promise<FoodListing> {
+    // Recalculate dynamic discounted price if relevant fields are updated
+    if (updates.originalPrice || updates.quantity || updates.minQuantityForDiscount || updates.bulkDiscountPercentage || updates.pickupWindowEnd) {
+      const existingListing = await storage.getFoodListing(listingId);
+      if (existingListing) {
+        const newOriginalPrice = parseFloat(updates.originalPrice?.toString() || existingListing.originalPrice);
+        const newDiscountedPrice = parseFloat(updates.discountedPrice?.toString() || existingListing.discountedPrice);
+        const newQuantity = updates.quantity || existingListing.quantity;
+        const newMinQuantityForDiscount = updates.minQuantityForDiscount || existingListing.minQuantityForDiscount;
+        const newBulkDiscountPercentage = parseFloat(updates.bulkDiscountPercentage?.toString() || existingListing.bulkDiscountPercentage);
+        const newPickupWindowEnd = new Date(updates.pickupWindowEnd?.toString() || existingListing.pickupWindowEnd);
+        const newPeakPricingRules = updates.peakPricingRules || existingListing.peakPricingRules;
+
+        const calculatedDiscountedPrice = this.calculateDynamicPrice(
+          newOriginalPrice,
+          newDiscountedPrice,
+          newQuantity,
+          newMinQuantityForDiscount,
+          newBulkDiscountPercentage,
+          newPickupWindowEnd,
+          newPeakPricingRules
+        );
+        updates.discountedPrice = calculatedDiscountedPrice.toString();
+      }
+    }
+
     const listing = await storage.updateFoodListing(listingId, updates);
 
     // If quantity was updated, check if it's sold out
@@ -137,6 +177,54 @@ export class ListingService {
     // This would require a more sophisticated implementation
     // to find users within a certain radius and send notifications
     // For now, we'll skip this implementation
+  }
+
+  private calculateDynamicPrice(
+    originalPrice: number,
+    currentDiscountedPrice: number,
+    quantity: number,
+    minQuantityForDiscount: number,
+    bulkDiscountPercentage: number,
+    pickupWindowEnd: Date,
+    peakPricingRules?: any // New parameter for peak pricing
+  ): number {
+    let finalPrice = currentDiscountedPrice;
+
+    // Time-based discount: higher discount closer to expiration
+    const timeUntilExpiry = pickupWindowEnd.getTime() - Date.now(); // in milliseconds
+    const hoursUntilExpiry = timeUntilExpiry / (1000 * 60 * 60);
+
+    if (hoursUntilExpiry <= 1) {
+      finalPrice = Math.min(finalPrice, originalPrice * 0.2); // 80% discount in last hour
+    } else if (hoursUntilExpiry <= 3) {
+      finalPrice = Math.min(finalPrice, originalPrice * 0.4); // 60% discount in last 3 hours
+    } else if (hoursUntilExpiry <= 6) {
+      finalPrice = Math.min(finalPrice, originalPrice * 0.6); // 40% discount in last 6 hours
+    }
+
+    // Quantity-based discount
+    if (quantity >= minQuantityForDiscount && bulkDiscountPercentage > 0) {
+      finalPrice = finalPrice * (1 - bulkDiscountPercentage / 100);
+    }
+
+    // Peak Time Pricing
+    if (peakPricingRules) {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 for Sunday, 1 for Monday, etc.
+      const currentHour = now.getHours();
+
+      for (const rule of peakPricingRules) {
+        if (rule.days.includes(currentDay)) {
+          const [startHour, endHour] = rule.timeRange.split('-').map(Number);
+          if (currentHour >= startHour && currentHour < endHour) {
+            finalPrice = finalPrice * (1 + rule.surchargePercentage / 100);
+            break; // Apply only one peak pricing rule
+          }
+        }
+      }
+    }
+
+    return parseFloat(finalPrice.toFixed(2));
   }
 
   private sortListings(listings: FoodListing[], sortBy: string): FoodListing[] {

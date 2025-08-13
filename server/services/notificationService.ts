@@ -1,7 +1,14 @@
 import { storage } from "../storage";
 import type { Notification, InsertNotification } from "@shared/schema";
+import type { Express } from "express";
 
 export class NotificationService {
+  private app: Express | undefined;
+
+  setApp(app: Express) {
+    this.app = app;
+  }
+
   async createNotification(notificationData: InsertNotification): Promise<Notification> {
     const notification = await storage.createNotification(notificationData);
     
@@ -161,10 +168,8 @@ export class NotificationService {
   }
 
   private sendRealTimeNotification(userId: string, notification: Notification): void {
-    // This would integrate with the WebSocket server
-    // Access through app.locals.broadcastToUser if available
-    if (global.app?.locals?.broadcastToUser) {
-      global.app.locals.broadcastToUser(userId, {
+    if (this.app?.locals?.broadcastToUser) {
+      this.app.locals.broadcastToUser(userId, {
         type: 'notification',
         data: notification,
       });

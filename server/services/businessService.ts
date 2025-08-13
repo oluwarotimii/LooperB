@@ -82,18 +82,23 @@ export class BusinessService {
   }
 
   async inviteStaff(businessId: string, email: string, role: "manager" | "staff"): Promise<any> {
-    // In a real implementation, this would send an email invitation
-    // For now, we'll create a pending invitation record
-    
     const business = await storage.getBusiness(businessId);
     if (!business) {
       throw new Error("Business not found");
     }
 
-    // Here you would typically:
-    // 1. Create an invitation record
-    // 2. Send email invitation
-    // 3. Return invitation details
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days expiry
+
+    await storage.createStaffInvitation(businessId, email, role, token, expiresAt);
+
+    const invitationLink = `${process.env.FRONTEND_URL}/accept-invitation?token=${token}`;
+    // await emailService.sendMail(
+    //   email,
+    //   `Invitation to join ${business.businessName} on Looper`,
+    //   `You have been invited to join ${business.businessName} as a ${role} on Looper.\n\nPlease click on the following link to accept the invitation:\n\n${invitationLink}\n\nIf you did not expect this invitation, please ignore this email.`,
+    //   `<p>You have been invited to join <strong>${business.businessName}</strong> as a <strong>${role}</strong> on Looper.</p>\n<p>Please click on the following link to accept the invitation:</p>\n<p><a href="${invitationLink}">${invitationLink}</a></p>\n<p>If you did not expect this invitation, please ignore this email.</p>`
+    // );
     
     return {
       businessId,
@@ -101,6 +106,7 @@ export class BusinessService {
       role,
       status: "pending",
       invitedAt: new Date(),
+      token, // For testing purposes, remove in production
     };
   }
 

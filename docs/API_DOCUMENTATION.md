@@ -7,7 +7,7 @@ The Looper API is a comprehensive RESTful service for the sustainable food redis
 ## Base URL
 
 - Development: `http://localhost:5000`
-- Production: `https://your-domain.replit.app`
+
 
 ## Authentication
 

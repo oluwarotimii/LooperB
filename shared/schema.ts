@@ -15,19 +15,8 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
 // Enums
-export const userTypeEnum = pgEnum("user_type", ["consumer", "business_owner", "manager", "staff", "admin"]);
+export const userRoleEnum = pgEnum("user_role", ["consumer", "business_owner", "manager", "staff", "admin"]);
 export const businessTypeEnum = pgEnum("business_type", ["restaurant", "hotel", "bakery", "supermarket", "cafe", "caterer"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["pending", "verified", "rejected"]);
 export const listingTypeEnum = pgEnum("listing_type", ["individual", "whoop_bag", "chef_special", "mystery_box"]);
@@ -37,17 +26,14 @@ export const businessRoleEnum = pgEnum("business_role", ["owner", "manager", "st
 export const entityTypeEnum = pgEnum("entity_type", ["business", "listing", "user"]);
 export const notificationTypeEnum = pgEnum("notification_type", ["order_update", "new_listing", "deal_expiring", "payment", "review", "system"]);
 
-// Users table (required for Replit Auth)
+// Users table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  password: varchar("password").notNull(),
   fullName: varchar("full_name").notNull(),
   phone: varchar("phone", { length: 50 }).unique(),
-  passwordHash: varchar("password_hash"),
-  userType: userTypeEnum("user_type").notNull().default("consumer"),
+  role: userRoleEnum("role").notNull().default("consumer"),
   isVerified: boolean("is_verified").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -56,6 +42,7 @@ export const users = pgTable("users", {
   referralCode: varchar("referral_code", { length: 10 }).unique(),
   walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).default("0.00"),
   lastActiveAt: timestamp("last_active_at"),
+  refreshToken: varchar("refresh_token"),
 });
 
 // Password resets
@@ -97,6 +84,16 @@ export const businessUsers = pgTable("business_users", {
   pk: { primaryKey: [table.userId, table.businessId] }
 }));
 
+export const staffInvitations = pgTable("staff_invitations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`), 
+  businessId: varchar("business_id").notNull(),
+  email: varchar("email").notNull(),
+  role: businessRoleEnum("role").notNull(),
+  token: varchar("token").unique().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Food listings
 export const foodListings = pgTable("food_listings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -116,6 +113,9 @@ export const foodListings = pgTable("food_listings", {
   ingredients: text("ingredients"),
   nutritionInfo: jsonb("nutrition_info"),
   preparationTime: integer("preparation_time"), // minutes
+  minQuantityForDiscount: integer("min_quantity_for_discount").default(1),
+  bulkDiscountPercentage: decimal("bulk_discount_percentage", { precision: 5, scale: 2 }).default("0.00"),
+  peakPricingRules: jsonb("peak_pricing_rules"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

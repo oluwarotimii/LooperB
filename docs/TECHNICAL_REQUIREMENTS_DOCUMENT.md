@@ -2,11 +2,10 @@
 
 ## Document Information
 
-- **Document Title**: Looper Platform Technical Requirements
+- **Document Title**: Looper Technical Requirements
 - **Version**: 1.0
-- **Date**: January 2024
-- **Project**: Sustainable Food Redistribution Platform
-- **Status**: Implementation Complete
+- **Date**: August 2025
+-
 
 ## Table of Contents
 
@@ -57,7 +56,7 @@ Looper is a comprehensive food redistribution platform designed to connect food 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Client Apps   │    │   Web Frontend  │    │  Mobile Apps    │
-│   (React Native)│    │   (React/Vite)  │    │   (Future)      │
+│                 │    |(React/Vite)/Next│    │   Expo/Flutter  │
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
           │                      │                      │
           └──────────────────────┼──────────────────────┘
@@ -71,8 +70,8 @@ Looper is a comprehensive food redistribution platform designed to connect food 
           │                      │                      │
     ┌─────▼─────┐        ┌───────▼────────┐      ┌─────▼─────┐
     │ Auth Layer│        │ Business Logic │      │WebSocket  │
-    │(Replit    │        │   Services     │      │  Server   │
-    │ OAuth)    │        │                │      │           │
+    │(JWT)      │        │   Services     │      │  Server   │
+    │           │        │                │      │           │
     └───────────┘        └───────┬────────┘      └───────────┘
                                  │
                     ┌─────────────┴───────────────┐
@@ -132,7 +131,7 @@ The system follows a modular service-oriented architecture with clear separation
 - **Web Framework**: Express.js 4.18 with comprehensive middleware stack
 - **Database ORM**: Drizzle ORM for type-safe database operations
 - **Database**: PostgreSQL 15+ with connection pooling via Neon Serverless
-- **Authentication**: Replit Auth (OpenID Connect) with Passport.js
+- **Authentication**: JWT-based authentication with OAuth 2.0 for Google Sign-In.
 - **Session Management**: Express-session with PostgreSQL store
 - **WebSocket**: 'ws' library for real-time communication
 - **File Processing**: Node.js built-in modules with QR code generation via 'qrcode'
@@ -158,9 +157,9 @@ The system follows a modular service-oriented architecture with clear separation
 
 ### 3.4 External Integrations
 
-- **Payment Processing**: Paystack API for Nigerian market
-- **Authentication Provider**: Replit OAuth 2.0 / OpenID Connect
-- **File Storage**: Custom file upload service with configurable CDN support
+- **Payment Processing**: Paystack API
+- **Authentication Provider**: OAuth
+- **File Storage**: Cloudinary for image and video storage and delivery.
 - **Geolocation**: Custom distance calculation service for location-based features
 
 ---
@@ -333,69 +332,15 @@ CREATE INDEX idx_food_listings_pickup_window ON food_listings(pickup_window_end)
 - **Idempotency**: PUT and DELETE operations are idempotent
 - **Pagination**: Cursor-based pagination for large datasets
 
-### 5.2 API Endpoint Categories
+### 5.2 WebSocket API Specification
 
-#### 5.2.1 Authentication Endpoints
-
-```
-GET    /api/login          - Initiate OAuth flow
-GET    /api/callback       - OAuth callback handler  
-GET    /api/logout         - End user session
-GET    /api/auth/user      - Get current user profile
-```
-
-#### 5.2.2 User Management Endpoints
-
-```
-GET    /api/users/{id}                    - Get user profile
-PUT    /api/users/{id}                    - Update user profile
-GET    /api/users/{id}/favorites          - Get user favorites
-POST   /api/users/{id}/favorites          - Add favorite item
-DELETE /api/users/{id}/favorites/{itemId} - Remove favorite
-GET    /api/users/{id}/impact             - Get impact statistics
-```
-
-#### 5.2.3 Business Management Endpoints
-
-```
-GET    /api/businesses              - List businesses with filters
-POST   /api/businesses              - Create new business
-GET    /api/businesses/{id}         - Get business details
-PUT    /api/businesses/{id}         - Update business
-GET    /api/businesses/{id}/reviews - Get business reviews
-GET    /api/businesses/{id}/analytics - Get business analytics
-```
-
-#### 5.2.4 Food Listing Endpoints
-
-```
-GET    /api/listings                           - Search food listings
-POST   /api/businesses/{id}/listings           - Create listing
-GET    /api/listings/{id}                      - Get listing details
-PUT    /api/listings/{id}                      - Update listing
-DELETE /api/listings/{id}                      - Delete listing
-GET    /api/listings/{id}/availability         - Check availability
-```
-
-#### 5.2.5 Order Management Endpoints
-
-```
-POST   /api/orders                    - Create new order
-GET    /api/orders                    - Get user orders
-GET    /api/orders/{id}               - Get order details
-PUT    /api/orders/{id}/status        - Update order status
-POST   /api/orders/{id}/verify-pickup - Verify pickup with QR code
-```
-
-### 5.3 WebSocket API Specification
-
-#### 5.3.1 Connection Endpoint
+#### 5.2 Connection Endpoint
 
 ```
 WebSocket: /ws
 ```
 
-#### 5.3.2 Message Format
+#### 5.3. Message Format
 
 ```json
 {
@@ -406,7 +351,7 @@ WebSocket: /ws
 }
 ```
 
-#### 5.3.3 Supported Message Types
+#### 5.3.1 Supported Message Types
 
 - `message` - Text message between user and business
 - `order_update` - Order status change notification
@@ -438,7 +383,7 @@ WebSocket: /ws
     "details": "Additional error context"
   },
   "meta": {
-    "timestamp": "ISO8601_timestamp", 
+    "timestamp": "ISO8601_timestamp",
     "requestId": "unique_request_id"
   }
 }
@@ -452,29 +397,28 @@ WebSocket: /ws
 
 #### 6.1.1 Authentication Strategy
 
-- **Primary Method**: Replit OAuth 2.0 / OpenID Connect integration
-- **Session Management**: HTTP-only secure cookies with PostgreSQL session store
-- **Token Lifecycle**: Automatic token refresh with 7-day session expiration
-- **Multi-Device Support**: Session management across multiple devices
+- **Primary Method**: JWT-based authentication with OAuth 2.0 for Google Sign-In.
+- **Token Lifecycle**: JWTs with short-lived access tokens and long-lived refresh tokens.
+- **Multi-Device Support**: Session management across multiple devices using refresh tokens.
 
 #### 6.1.2 Authorization Model
 
 ```typescript
 enum UserRole {
-  CONSUMER = 'consumer',           // Regular platform users
-  BUSINESS_OWNER = 'business_owner', // Business account owners
-  MANAGER = 'manager',             // Business managers
-  STAFF = 'staff',                 // Business staff members
-  ADMIN = 'admin'                  // Platform administrators
+  CONSUMER = "consumer", // Regular platform users
+  BUSINESS_OWNER = "business_owner", // Business account owners
+  MANAGER = "manager", // Business managers
+  STAFF = "staff", // Business staff members
+  ADMIN = "admin", // Platform administrators
 }
 
 enum Permission {
-  READ_BUSINESS = 'read:business',
-  WRITE_BUSINESS = 'write:business',
-  MANAGE_LISTINGS = 'manage:listings',
-  PROCESS_ORDERS = 'process:orders',
-  VIEW_ANALYTICS = 'view:analytics',
-  ADMIN_ACCESS = 'admin:access'
+  READ_BUSINESS = "read:business",
+  WRITE_BUSINESS = "write:business",
+  MANAGE_LISTINGS = "manage:listings",
+  PROCESS_ORDERS = "process:orders",
+  VIEW_ANALYTICS = "view:analytics",
+  ADMIN_ACCESS = "admin:access",
 }
 ```
 
@@ -507,10 +451,10 @@ enum Permission {
 
 ```typescript
 const rateLimits = {
-  authentication: { requests: 5, window: '1 minute' },
-  api_general: { requests: 100, window: '1 minute' },
-  file_upload: { requests: 10, window: '1 minute' },
-  messaging: { requests: 50, window: '1 minute' }
+  authentication: { requests: 5, window: "1 minute" },
+  api_general: { requests: 100, window: "1 minute" },
+  file_upload: { requests: 10, window: "1 minute" },
+  messaging: { requests: 50, window: "1 minute" },
 };
 ```
 
@@ -563,9 +507,9 @@ interface PaystackConfig {
   secretKey: string;
   publicKey: string;
   webhookSecret: string;
-  baseUrl: 'https://api.paystack.co';
-  supportedMethods: ['card', 'bank_transfer', 'ussd'];
-  currency: 'NGN';
+  baseUrl: "https://api.paystack.co";
+  supportedMethods: ["card", "bank_transfer", "ussd"];
+  currency: "NGN";
 }
 ```
 
@@ -573,71 +517,36 @@ interface PaystackConfig {
 
 1. **Order Creation**: Generate payment reference and amount calculation
 2. **Payment Processing**: Redirect to Paystack payment page
-3. **Webhook Handling**: Process payment status updates asynchronously  
+3. **Webhook Handling**: Process payment status updates asynchronously
 4. **Order Fulfillment**: Update order status based on payment confirmation
 5. **Refund Processing**: Handle refund requests through Paystack API
 
-### 8.2 Authentication Integration
-
-#### 8.2.1 Replit Auth Configuration
-
-```typescript
-interface ReplitAuthConfig {
-  issuerUrl: 'https://replit.com/oidc';
-  clientId: process.env.REPL_ID;
-  scopes: ['openid', 'email', 'profile', 'offline_access'];
-  callbackUrl: '/api/callback';
-  sessionSecret: process.env.SESSION_SECRET;
-}
-```
-
 ### 8.3 File Storage Integration
 
-#### 8.3.1 File Upload Service
+#### 8.3.1 Cloudinary Integration
 
-- **Supported Formats**: Images (JPEG, PNG, WebP), Documents (PDF), Videos (MP4)
-- **Size Limits**: Images 10MB, Documents 5MB, Videos 50MB
-- **Processing**: Automatic image optimization and thumbnail generation
-- **Storage**: Local filesystem with configurable CDN integration
-- **Security**: File type validation and malware scanning
+- **Supported Formats**: Images (JPEG, PNG, WebP), Videos (MP4)
+- **Size Limits**: Configurable in Cloudinary dashboard
+- **Processing**: Automatic image optimization, transformations, and thumbnail generation
+- **Storage**: Cloudinary cloud storage with CDN integration
+- **Security**: API key and secret-based authentication
 
 ---
 
 ## 9. Deployment Architecture
 
-### 9.1 Replit Deployment
+### 9.1 Deployment
 
-#### 9.1.1 Application Structure
-
-```
-project-root/
-├── server/              # Backend Express.js application
-│   ├── services/        # Business logic services
-│   ├── middleware/      # Authentication, validation, logging
-│   ├── utils/           # Utility functions and helpers
-│   └── index.ts         # Application entry point
-├── client/              # Frontend React application
-│   ├── src/            # React components and pages
-│   └── public/         # Static assets
-├── shared/             # Shared TypeScript schemas
-├── docs/               # API documentation
-└── package.json        # Dependencies and scripts
-```
-
-#### 9.1.2 Environment Configuration
+#### 9.1. Environment Configuration
 
 ```bash
 # Required Environment Variables
 DATABASE_URL=postgresql://user:pass@host:port/dbname
 SESSION_SECRET=secure_random_string
-REPL_ID=replit_application_id
-ISSUER_URL=https://replit.com/oidc
+JWT_SECRET=your_jwt_secret
 NODE_ENV=production
 
-# Optional Configuration
-CDN_BASE_URL=https://cdn.example.com
-PAYSTACK_SECRET_KEY=sk_live_...
-SENTRY_DSN=https://...
+
 ```
 
 ### 9.2 Production Considerations
@@ -667,7 +576,7 @@ SENTRY_DSN=https://...
 #### 10.1.1 Testing Pyramid
 
 1. **Unit Tests**: Individual service method testing with mocked dependencies
-2. **Integration Tests**: Database operations and external API integration testing  
+2. **Integration Tests**: Database operations and external API integration testing
 3. **API Tests**: End-to-end API endpoint testing with authentication
 4. **UI Tests**: Critical user journey testing with automated browsers
 5. **Load Tests**: Performance testing under simulated user load
@@ -713,10 +622,10 @@ SENTRY_DSN=https://...
 
 ```typescript
 // Health check endpoints
-GET /health              // Basic application health
-GET /health/detailed     // Detailed system health with dependencies
-GET /health/database     // Database connectivity check
-GET /health/external     // External service connectivity check
+GET / health; // Basic application health
+GET / health / detailed; // Detailed system health with dependencies
+GET / health / database; // Database connectivity check
+GET / health / external; // External service connectivity check
 ```
 
 #### 11.1.2 Metrics Collection
@@ -731,7 +640,7 @@ GET /health/external     // External service connectivity check
 #### 11.2.1 Error Classification
 
 1. **Critical**: Authentication failures, payment processing errors
-2. **High**: Database connectivity issues, file upload failures  
+2. **High**: Database connectivity issues, file upload failures
 3. **Medium**: API validation errors, third-party service timeouts
 4. **Low**: Warning-level issues, performance degradation
 
@@ -770,12 +679,12 @@ cancelled ← cancelled ← cancelled
 
 ```typescript
 interface PriceCalculation {
-  originalPrice: number;        // Business-set original price
-  discountedPrice: number;      // Business-set discounted price
-  discountPercentage: number;   // Calculated discount percentage
-  platformFee: number;         // Fixed platform fee (5% of discounted price)
-  tax: number;                 // Applicable taxes
-  totalAmount: number;         // Final amount to be paid
+  originalPrice: number; // Business-set original price
+  discountedPrice: number; // Business-set discounted price
+  discountPercentage: number; // Calculated discount percentage
+  platformFee: number; // Fixed platform fee (5% of discounted price)
+  tax: number; // Applicable taxes
+  totalAmount: number; // Final amount to be paid
 }
 ```
 
@@ -792,11 +701,11 @@ interface PriceCalculation {
 
 ```typescript
 interface ImpactMetrics {
-  mealsRescued: number;           // Total meals saved from waste
-  moneySaved: number;             // Consumer savings in currency
-  co2Prevented: number;           // CO2 emissions prevented (kg)
-  waterSaved: number;             // Water resources saved (liters)
-  wasteReduction: number;         // Food waste reduction (kg)
+  mealsRescued: number; // Total meals saved from waste
+  moneySaved: number; // Consumer savings in currency
+  co2Prevented: number; // CO2 emissions prevented (kg)
+  waterSaved: number; // Water resources saved (liters)
+  wasteReduction: number; // Food waste reduction (kg)
 }
 ```
 
@@ -813,7 +722,7 @@ interface ImpactMetrics {
 
 ### 13.1 Planned Features
 
-1. **Mobile Applications**: React Native apps for iOS and Android
+1. **Mobile Applications**: Expo apps for iOS and Android
 2. **Advanced Analytics**: Machine learning-based demand forecasting
 3. **Multi-language Support**: Internationalization for multiple languages
 4. **Push Notifications**: Native mobile push notification integration
@@ -835,13 +744,13 @@ This Technical Requirements Document outlines the comprehensive architecture and
 
 ### 14.1 Key Achievements
 
-- ✅ **Complete API Coverage**: 50+ documented endpoints with OpenAPI 3.0 specification
-- ✅ **Modular Architecture**: 10 atomic service components with clear separation of concerns
-- ✅ **Type-Safe Implementation**: End-to-end TypeScript with runtime validation
-- ✅ **Real-time Capabilities**: WebSocket integration for messaging and notifications
-- ✅ **Production-Ready**: Comprehensive error handling, logging, and monitoring
-- ✅ **Security Compliance**: Enterprise-grade authentication and data protection
-- ✅ **Performance Optimized**: Sub-200ms API responses with efficient database queries
+- **Complete API Coverage**: 50+ documented endpoints with OpenAPI 3.0 specification
+- **Modular Architecture**: 10 atomic service components with clear separation of concerns
+- **Type-Safe Implementation**: End-to-end TypeScript with runtime validation
+- **Real-time Capabilities**: WebSocket integration for messaging and notifications
+- **Production-Ready**: Comprehensive error handling, logging, and monitoring
+- **Security Compliance**: Enterprise-grade authentication and data protection
+- **Performance Optimized**: Sub-200ms API responses with efficient database queries
 
 ### 14.2 Technical Excellence
 
@@ -852,12 +761,3 @@ The implementation demonstrates technical excellence through:
 - **Domain-Driven Design**: Business logic encapsulation in dedicated service classes
 - **API-First Design**: Comprehensive OpenAPI documentation with type-safe implementations
 - **Performance Engineering**: Optimized database queries and efficient request handling
-
-This platform serves as a foundation for sustainable growth in the food redistribution market, providing both environmental benefits and economic opportunities for businesses and consumers.
-
----
-
-**Document Prepared By**: Looper Development Team  
-**Review Status**: Complete  
-**Implementation Status**: Production Ready  
-**Next Review Date**: Q2 2024

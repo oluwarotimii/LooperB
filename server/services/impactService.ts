@@ -28,53 +28,41 @@ export class ImpactService {
     startDate?: Date,
     endDate?: Date
   ): Promise<any> {
-    const analytics = await storage.getBusinessAnalytics(businessId, startDate, endDate);
+    const analyticsData = await storage.getBusinessAnalytics(businessId, startDate, endDate);
     const business = await storage.getBusiness(businessId);
     
-    // Get current period data
-    const orders = await storage.getOrdersByBusiness(businessId);
-    const listings = await storage.getFoodListingsByBusiness(businessId);
-    const reviews = await storage.getReviewsByBusiness(businessId);
-    
-    // Calculate metrics
-    const completedOrders = orders.filter(o => o.status === "completed");
-    const totalRevenue = completedOrders.reduce((sum, order) => 
-      sum + parseFloat(order.totalAmount), 0
-    );
-    
-    const activeListings = listings.filter(l => l.status === "active");
-    const totalListings = listings.length;
-    
-    // Calculate food waste metrics
-    const totalItemsSold = completedOrders.length * 2; // Estimate 2 items per order
-    const estimatedFoodWasteSaved = totalItemsSold * 0.8; // kg
-    const estimatedCo2Saved = totalItemsSold * 1.2; // kg CO2
-    
-    // Calculate efficiency metrics
-    const listingConversionRate = completedOrders.length / Math.max(totalListings, 1);
-    const averageOrderValue = totalRevenue / Math.max(completedOrders.length, 1);
-    
+    // Aggregate data from analyticsData
+    const totalOrders = analyticsData.reduce((sum, data) => sum + data.totalOrders, 0);
+    const completedOrders = analyticsData.reduce((sum, data) => sum + data.completedOrders, 0);
+    const totalRevenue = analyticsData.reduce((sum, data) => sum + parseFloat(data.totalRevenue), 0);
+    const totalListings = analyticsData.reduce((sum, data) => sum + data.totalListings, 0);
+    const foodWasteSaved = analyticsData.reduce((sum, data) => sum + parseFloat(data.foodWasteSaved), 0);
+    const co2Saved = analyticsData.reduce((sum, data) => sum + parseFloat(data.co2Saved), 0);
+
+    const listingConversionRate = totalListings > 0 ? (completedOrders / totalListings) * 100 : 0;
+    const averageOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0;
+
     return {
       businessId,
       businessName: business?.businessName,
       period: { startDate, endDate },
       
       // Revenue metrics
-      totalRevenue,
-      totalOrders: orders.length,
-      completedOrders: completedOrders.length,
-      averageOrderValue,
+      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      totalOrders,
+      completedOrders,
+      averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
       
       // Listing metrics
       totalListings,
-      activeListings: activeListings.length,
-      soldOutListings: listings.filter(l => l.status === "sold_out").length,
-      listingConversionRate: parseFloat((listingConversionRate * 100).toFixed(1)),
+      activeListings: totalListings - analyticsData.reduce((sum, data) => sum + data.soldOutListings, 0), // Placeholder
+      soldOutListings: analyticsData.reduce((sum, data) => sum + data.soldOutListings, 0), // Placeholder
+      listingConversionRate: parseFloat(listingConversionRate.toFixed(1)),
       
       // Impact metrics
-      totalMealsRescued: totalItemsSold,
-      foodWasteSaved: estimatedFoodWasteSaved,
-      co2Saved: estimatedCo2Saved,
+      totalMealsRescued: completedOrders * 2, // Estimate 2 items per order
+      foodWasteSaved: parseFloat(foodWasteSaved.toFixed(2)),
+      co2Saved: parseFloat(co2Saved.toFixed(2)),
       wasteReductionPercentage: await this.calculateWasteReduction(businessId),
       
       // Customer metrics
@@ -84,7 +72,7 @@ export class ImpactService {
       
       // Rating metrics
       averageRating: parseFloat(business?.averageRating || "0"),
-      totalReviews: reviews.length,
+      totalReviews: business?.totalReviews || 0,
       ratingTrend: await this.getRatingTrend(businessId),
       
       // Time-based analytics
@@ -98,24 +86,24 @@ export class ImpactService {
   }
 
   async getGlobalImpactStats(): Promise<any> {
-    // This would require aggregating across all users and businesses
+    const globalStats = await storage.getGlobalImpactStats();
     return {
-      totalMealsRescued: 12847,
-      totalCo2Saved: 24.3, // tonnes
-      totalBusinesses: 340,
-      totalUsers: 8920,
-      totalMoneySaved: 2400000, // ₦2.4M
-      wasteReductionPercentage: 23.5,
+      totalMealsRescued: globalStats.totalMealsRescued || 0,
+      totalCo2Saved: parseFloat((globalStats.totalMealsRescued * 1.2 / 1000).toFixed(2)) || 0, // tonnes
+      totalBusinesses: globalStats.totalBusinesses || 0,
+      totalUsers: globalStats.totalUsers || 0,
+      totalMoneySaved: parseFloat(globalStats.totalMoneySaved || "0"),
+      wasteReductionPercentage: 23.5, // Placeholder, needs actual calculation
       topPerformingCities: [
         { city: "Lagos", mealsRescued: 8450 },
         { city: "Abuja", mealsRescued: 2100 },
         { city: "Port Harcourt", mealsRescued: 1800 },
-      ],
+      ], // Placeholder
       growthRate: {
         mealsRescued: 15.2, // % growth month over month
         newBusinesses: 8.7,
         newUsers: 12.3,
-      }
+      }, // Placeholder
     };
   }
 

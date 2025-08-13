@@ -243,8 +243,7 @@ export class MessageService {
   }
 
   private async getMessageById(messageId: string): Promise<Message | null> {
-    // This would require a method in storage to get message by ID
-    return null; // Placeholder
+    return await storage.getMessage(messageId);
   }
 
   private async notifyBusinessUsers(businessId: string, message: Message): Promise<void> {

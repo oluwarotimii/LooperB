@@ -67,8 +67,7 @@ export class ReviewService {
   }
 
   async getReviewById(reviewId: string): Promise<Review | null> {
-    // This would require a method in storage to get review by ID
-    return null; // Placeholder
+    return await storage.getReview(reviewId);
   }
 
   async respondToReview(
@@ -210,13 +209,13 @@ export class ReviewService {
 
   async flagReview(reviewId: string, reason: string, flaggedBy: string): Promise<void> {
     // This would create a report for the review
-    await storage.createUser({
+    await storage.createReport({
       reporterId: flaggedBy,
       entityType: "review",
       entityId: reviewId,
       reason,
       description: "Review flagged for moderation",
-    } as any);
+    });
 
     // Notify moderation team
     await notificationService.createNotification({
@@ -284,8 +283,7 @@ export class ReviewService {
   }
 
   private async updateReview(reviewId: string, updates: Partial<Review>): Promise<Review> {
-    // This would require a method in storage to update review
-    return {} as Review; // Placeholder
+    return await storage.updateReview(reviewId, updates);
   }
 
   async generateReviewInsights(businessId: string): Promise<any> {

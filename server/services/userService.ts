@@ -46,11 +46,7 @@ export class UserService {
       if (!referrer) return false;
 
       // Create referral record
-      await storage.createUser({
-        id: referredUserId,
-        referrerId: referrer.id,
-        referredId: referredUserId,
-      } as any);
+      await storage.createReferral(referrer.id, referredUserId);
 
       // Award points to both users
       await storage.addPoints(referrer.id, 100, "referral_bonus");
@@ -72,8 +68,7 @@ export class UserService {
   }
 
   private async getUserByReferralCode(code: string): Promise<User | null> {
-    // This would need a custom query in storage
-    return null; // Placeholder
+    return await storage.getUserByReferralCode(code);
   }
 
   async updateLastActive(userId: string): Promise<void> {

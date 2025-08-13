@@ -2,6 +2,9 @@ import { storage } from "../storage";
 import { listingService } from "./listingService";
 import { notificationService } from "./notificationService";
 import { walletService } from "./walletService";
+import { PaymentService } from "./paymentService";
+
+const paymentService = new PaymentService();
 import { qrCodeGenerator } from "../utils/qrCode";
 import type { Order, InsertOrder, OrderItem } from "@shared/schema";
 
@@ -13,11 +16,12 @@ interface CreateOrderRequest {
   }>;
   specialInstructions?: string;
   useWallet?: boolean;
+  pointsToRedeem?: number;
 }
 
 export class OrderService {
-  async createOrder(userId: string, orderData: CreateOrderRequest): Promise<Order> {
-    const { items, ...orderInfo } = orderData;
+  async createOrder(userId: string, orderData: CreateOrderRequest): Promise<any> {
+    const { items, useWallet, pointsToRedeem, ...orderInfo } = orderData;
 
     // Calculate total amount and validate items
     let totalAmount = 0;
@@ -48,6 +52,17 @@ export class OrderService {
       });
     }
 
+    // Apply loyalty discount
+    if (pointsToRedeem && pointsToRedeem > 0) {
+      const user = await storage.getUser(userId);
+      if (!user || user.pointsBalance < pointsToRedeem) {
+        throw new Error("Insufficient points");
+      }
+      const discountAmount = pointsToRedeem / 10; // Example: 10 points = ₦1 discount
+      totalAmount = Math.max(0, totalAmount - discountAmount);
+      await storage.addPoints(userId, -pointsToRedeem, "points_redemption");
+    }
+
     // Reserve items
     for (const item of items) {
       const reserved = await listingService.reserveItems(item.listingId, item.quantity);
@@ -75,10 +90,17 @@ export class OrderService {
       const qrCodeUrl = await qrCodeGenerator.generatePickupQR(order.pickupCode);
       await storage.updateOrder(order.id, { qrCodeUrl });
 
+      // Initialize payment
+      const user = await storage.getUser(userId);
+      if (!user?.email) {
+        throw new Error("User email not found");
+      }
+      const paymentInfo = await paymentService.initializePayment(order.id, user.email, totalAmount, useWallet);
+
       // Send notifications
       await this.sendOrderNotifications(order, "created");
 
-      return order;
+      return { order, paymentInfo };
     } catch (error) {
       // Release reserved items on error
       for (const item of items) {
@@ -194,16 +216,24 @@ export class OrderService {
     const order = await storage.getOrder(orderId);
     if (!order) throw new Error("Order not found");
 
-    // Process wallet refund
-    if (order.userId) {
-      await walletService.addTransaction(
-        order.userId,
-        parseFloat(order.totalAmount),
-        "credit",
-        "order_refund",
-        `Refund for order ${orderId}: ${reason}`,
-        orderId
-      );
+    // Process refund
+    if (order.paymentReference?.startsWith("wallet_")) {
+      // Process wallet refund
+      if (order.userId) {
+        await walletService.addTransaction(
+          order.userId,
+          parseFloat(order.totalAmount),
+          "credit",
+          "order_refund",
+          `Refund for order ${orderId}: ${reason}`,
+          orderId
+        );
+      }
+    } else if (order.paymentReference) {
+      // Process Paystack refund
+      // This is a simplified example. In a real application, you would need to
+      // call the Paystack API to process the refund.
+      console.log(`Initiating Paystack refund for order ${orderId}`);
     }
 
     // Cancel order

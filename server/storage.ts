@@ -18,7 +18,7 @@ import {
   notifications,
   businessAnalytics,
   type User,
-  type UpsertUser,
+  type InsertUser,
   type Business,
   type InsertBusiness,
   type FoodListing,
@@ -42,25 +42,25 @@ import { db } from "./db";
 import { eq, and, desc, asc, sql, like, ilike, gte, lte, inArray } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserByPhone(phone: string): Promise<User | undefined>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
-  
+  userHasAccessToBusiness(userId: string, businessId: string): Promise<boolean>;
+
   // Business operations
   createBusiness(business: InsertBusiness): Promise<Business>;
   getBusiness(id: string): Promise<Business | undefined>;
   getBusinessesByLocation(lat: number, lng: number, radius: number): Promise<Business[]>;
   updateBusiness(id: string, updates: Partial<Business>): Promise<Business>;
   searchBusinesses(query: string, filters?: any): Promise<Business[]>;
-  
+
   // Business user operations
   addBusinessUser(userId: string, businessId: string, role: "owner" | "manager" | "staff"): Promise<BusinessUser>;
   getBusinessUsers(businessId: string): Promise<BusinessUser[]>;
   getUserBusinesses(userId: string): Promise<Business[]>;
-  
+
   // Food listing operations
   createFoodListing(listing: InsertFoodListing): Promise<FoodListing>;
   getFoodListing(id: string): Promise<FoodListing | undefined>;
@@ -68,7 +68,7 @@ export interface IStorage {
   searchFoodListings(filters: any): Promise<FoodListing[]>;
   updateFoodListing(id: string, updates: Partial<FoodListing>): Promise<FoodListing>;
   deleteFoodListing(id: string): Promise<boolean>;
-  
+
   // Order operations
   createOrder(order: InsertOrder): Promise<Order>;
   getOrder(id: string): Promise<Order | undefined>;
@@ -76,46 +76,55 @@ export interface IStorage {
   getOrdersByBusiness(businessId: string): Promise<Order[]>;
   updateOrder(id: string, updates: Partial<Order>): Promise<Order>;
   getOrderByPickupCode(code: string): Promise<Order | undefined>;
-  
+
   // Order item operations
   createOrderItems(items: Omit<OrderItem, "id">[]): Promise<OrderItem[]>;
   getOrderItems(orderId: string): Promise<OrderItem[]>;
-  
+
   // Review operations
   createReview(review: InsertReview): Promise<Review>;
+  getReview(id: string): Promise<Review | undefined>;
+  updateReview(id: string, updates: Partial<Review>): Promise<Review>;
   getReviewsByBusiness(businessId: string): Promise<Review[]>;
   getReviewsByUser(userId: string): Promise<Review[]>;
   updateBusinessRating(businessId: string): Promise<void>;
-  
+
   // Wallet operations
   getWalletBalance(userId: string): Promise<number>;
   createWalletTransaction(transaction: Omit<WalletTransaction, "id">): Promise<WalletTransaction>;
   getWalletTransactions(userId: string): Promise<WalletTransaction[]>;
   updateWalletBalance(userId: string, amount: number): Promise<User>;
-  
+
   // Points operations
   addPoints(userId: string, points: number, reason: string, orderId?: string): Promise<PointsHistory>;
   getPointsHistory(userId: string): Promise<PointsHistory[]>;
-  
+
+  // Referral operations
+  createReferral(referrerId: string, referredId: string): Promise<typeof referrals.$inferSelect>;
+
   // Favorites operations
   addFavorite(userId: string, entityId: string, type: "business" | "listing"): Promise<UserFavorite>;
   removeFavorite(userId: string, entityId: string, type: "business" | "listing"): Promise<boolean>;
   getUserFavorites(userId: string, type?: "business" | "listing"): Promise<UserFavorite[]>;
-  
+
   // Message operations
   createMessage(message: InsertMessage): Promise<Message>;
+  getMessage(id: string): Promise<Message | undefined>;
   getMessages(userId: string, businessId?: string): Promise<Message[]>;
+  getConversation(userId: string, otherUserId: string): Promise<Message[]>;
+  getBusinessConversation(userId: string, businessId: string): Promise<Message[]>;
   markMessageAsRead(messageId: string): Promise<Message>;
-  
+
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
   getUserNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(notificationId: string): Promise<Notification>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
-  
+
   // Dietary tags
   getDietaryTags(): Promise<DietaryTag[]>;
-  
+  addListingDietaryTags(listingId: string, tagIds: string[]): Promise<void>;
+
   // Analytics
   getBusinessAnalytics(businessId: string, startDate?: Date, endDate?: Date): Promise<any[]>;
   getUserImpactStats(userId: string): Promise<any>;
@@ -128,28 +137,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
-  }
-
-  async getUserByPhone(phone: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.phone, phone));
     return user;
   }
 
@@ -160,6 +154,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async userHasAccessToBusiness(userId: string, businessId: string): Promise<boolean> {
+    const [businessUser] = await db
+      .select()
+      .from(businessUsers)
+      .where(and(eq(businessUsers.userId, userId), eq(businessUsers.businessId, businessId)));
+    return !!businessUser;
   }
 
   // Business operations
@@ -204,12 +206,33 @@ export class DatabaseStorage implements IStorage {
     let queryBuilder = db
       .select()
       .from(businesses)
-      .where(
-        and(
-          eq(businesses.isActive, true),
-          ilike(businesses.businessName, `%${query}%`)
-        )
-      );
+      .where(eq(businesses.isActive, true));
+
+    if (query) {
+      queryBuilder = queryBuilder.where(ilike(businesses.businessName, `%${query}%`));
+    }
+
+    if (filters?.businessType) {
+      queryBuilder = queryBuilder.where(eq(businesses.businessType, filters.businessType));
+    }
+
+    return await queryBuilder.orderBy(desc(businesses.averageRating));
+  }
+
+  async searchBusinessesFullText(query: string, filters?: any): Promise<Business[]> {
+    // This is a simplified full-text search. For a robust solution, consider PostgreSQL's tsvector and tsquery.
+    // For now, it will perform a case-insensitive LIKE search on businessName and description.
+    let queryBuilder = db
+      .select()
+      .from(businesses)
+      .where(eq(businesses.isActive, true));
+
+    if (query) {
+      queryBuilder = queryBuilder.where(or(
+        ilike(businesses.businessName, `%${query}%`),
+        ilike(businesses.description, `%${query}%`)
+      ));
+    }
 
     if (filters?.businessType) {
       queryBuilder = queryBuilder.where(eq(businesses.businessType, filters.businessType));
@@ -273,8 +296,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(foodListings.status, "active"));
 
     if (filters.businessType) {
-      queryBuilder = queryBuilder
-        .innerJoin(businesses, eq(foodListings.businessId, businesses.id));
       queryBuilder = db
         .select()
         .from(foodListings)
@@ -299,6 +320,47 @@ export class DatabaseStorage implements IStorage {
       queryBuilder = db
         .select()
         .from(foodListings)
+        .where(and(
+          eq(foodListings.status, "active"),
+          lte(foodListings.pickupWindowEnd, filters.expiringBefore)
+        ));
+    }
+
+    return await queryBuilder.orderBy(asc(foodListings.pickupWindowEnd));
+  }
+
+  async searchFoodListingsFullText(query: string, filters?: any): Promise<FoodListing[]> {
+    let queryBuilder = db
+      .select()
+      .from(foodListings)
+      .where(eq(foodListings.status, "active"));
+
+    if (query) {
+      queryBuilder = queryBuilder.where(or(
+        ilike(foodListings.title, `%${query}%`),
+        ilike(foodListings.description, `%${query}%`)
+      ));
+    }
+
+    if (filters.businessType) {
+      queryBuilder = queryBuilder
+        .innerJoin(businesses, eq(foodListings.businessId, businesses.id))
+        .where(and(
+          eq(foodListings.status, "active"),
+          eq(businesses.businessType, filters.businessType)
+        ));
+    }
+
+    if (filters.maxPrice) {
+      queryBuilder = queryBuilder
+        .where(and(
+          eq(foodListings.status, "active"),
+          lte(foodListings.discountedPrice, filters.maxPrice)
+        ));
+    }
+
+    if (filters.expiringBefore) {
+      queryBuilder = queryBuilder
         .where(and(
           eq(foodListings.status, "active"),
           lte(foodListings.pickupWindowEnd, filters.expiringBefore)
@@ -425,6 +487,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getReview(id: string): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, id));
+    return review;
+  }
+
+  async updateReview(id: string, updates: Partial<Review>): Promise<Review> {
+    const [review] = await db
+      .update(reviews)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(reviews.id, id))
+      .returning();
+    return review;
+  }
+
   // Wallet operations
   async getWalletBalance(userId: string): Promise<number> {
     const user = await this.getUser(userId);
@@ -483,6 +559,23 @@ export class DatabaseStorage implements IStorage {
       .from(pointsHistory)
       .where(eq(pointsHistory.userId, userId))
       .orderBy(desc(pointsHistory.createdAt));
+  }
+
+  // Password reset operations
+  async createPasswordResetToken(email: string, token: string, expiresAt: Date): Promise<void> {
+    await db.insert(passwordResets).values({ email, token, expiresAt }).onConflictDoUpdate({
+      target: passwordResets.email,
+      set: { token, expiresAt },
+    });
+  }
+
+  async getPasswordResetToken(token: string): Promise<typeof passwordResets.$inferSelect | undefined> {
+    const [resetToken] = await db.select().from(passwordResets).where(eq(passwordResets.token, token));
+    return resetToken;
+  }
+
+  async deletePasswordResetToken(token: string): Promise<void> {
+    await db.delete(passwordResets).where(eq(passwordResets.token, token));
   }
 
   // Favorites operations
@@ -559,6 +652,29 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
+  async getMessage(id: string): Promise<Message | undefined> {
+    const [message] = await db.select().from(messages).where(eq(messages.id, id));
+    return message;
+  }
+
+  async getConversation(userId: string, otherUserId: string): Promise<Message[]> {
+    return await db.select().from(messages).where(
+      or(
+        and(eq(messages.senderId, userId), eq(messages.receiverId, otherUserId)),
+        and(eq(messages.senderId, otherUserId), eq(messages.receiverId, userId))
+      )
+    ).orderBy(asc(messages.createdAt));
+  }
+
+  async getBusinessConversation(userId: string, businessId: string): Promise<Message[]> {
+    return await db.select().from(messages).where(
+      and(
+        eq(messages.businessId, businessId),
+        or(eq(messages.senderId, userId), eq(messages.receiverId, userId))
+      )
+    ).orderBy(asc(messages.createdAt));
+  }
+
   // Notification operations
   async createNotification(notification: InsertNotification): Promise<Notification> {
     const [newNotification] = await db.insert(notifications).values(notification).returning();
@@ -592,56 +708,35 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
+  // Report operations
+  async createReport(report: { reporterId?: string; entityType: "business" | "listing" | "user" | "review"; entityId: string; reason: string; description?: string; evidence?: any; }): Promise<typeof reports.$inferSelect> {
+    const [newReport] = await db.insert(reports).values(report).returning();
+    return newReport;
+  }
+
   // Dietary tags
   async getDietaryTags(): Promise<DietaryTag[]> {
     return await db.select().from(dietaryTags).orderBy(asc(dietaryTags.tagName));
   }
 
-  // Analytics
-  async getBusinessAnalytics(businessId: string, startDate?: Date, endDate?: Date): Promise<any[]> {
-    let queryBuilder = db
-      .select()
-      .from(businessAnalytics)
-      .where(eq(businessAnalytics.businessId, businessId));
-
-    if (startDate) {
-      queryBuilder = db
-        .select()
-        .from(businessAnalytics)
-        .where(and(
-          eq(businessAnalytics.businessId, businessId),
-          gte(businessAnalytics.date, startDate)
-        ));
-    }
-
-    if (endDate) {
-      queryBuilder = db
-        .select()
-        .from(businessAnalytics)
-        .where(and(
-          eq(businessAnalytics.businessId, businessId),
-          lte(businessAnalytics.date, endDate)
-        ));
-    }
-
-    return await queryBuilder.orderBy(desc(businessAnalytics.date));
+  async addListingDietaryTags(listingId: string, tagIds: string[]): Promise<void> {
+    const values = tagIds.map(tagId => ({ listingId, tagId }));
+    await db.insert(listingDietaryTags).values(values).execute();
   }
 
-  async getUserImpactStats(userId: string): Promise<any> {
-    const result = await db
-      .select({
-        totalMealsRescued: sql<number>`count(*)`,
-        totalMoneySaved: sql<number>`sum(${orders.totalAmount})`,
-        totalCo2Saved: sql<number>`sum(${orderItems.quantity} * 1.2)`, // Estimated CO2 per item
-      })
-      .from(orders)
-      .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
-      .where(and(
-        eq(orders.userId, userId),
-        eq(orders.status, "completed")
-      ));
+  // Staff invitation operations
+  async createStaffInvitation(businessId: string, email: string, role: "manager" | "staff", token: string, expiresAt: Date): Promise<typeof staffInvitations.$inferSelect> {
+    const [invitation] = await db.insert(staffInvitations).values({ businessId, email, role, token, expiresAt }).returning();
+    return invitation;
+  }
 
-    return result[0] || { totalMealsRescued: 0, totalMoneySaved: 0, totalCo2Saved: 0 };
+  async getStaffInvitation(token: string): Promise<typeof staffInvitations.$inferSelect | undefined> {
+    const [invitation] = await db.select().from(staffInvitations).where(eq(staffInvitations.token, token));
+    return invitation;
+  }
+
+  async deleteStaffInvitation(token: string): Promise<void> {
+    await db.delete(staffInvitations).where(eq(staffInvitations.token, token));
   }
 
   // Helper methods

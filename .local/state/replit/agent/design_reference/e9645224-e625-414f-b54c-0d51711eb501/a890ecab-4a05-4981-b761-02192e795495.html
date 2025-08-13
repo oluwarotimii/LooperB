@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looper - Rescue Food, Save Money, Save Planet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'looper-green': '#16A34A',
+                        'looper-orange': '#EA580C',
+                        'looper-success': '#22C55E',
+                        'looper-warning': '#F59E0B',
+                        'looper-error': '#EF4444'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- @COMPONENT: Header [navigation with search and user menu] -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-4">
+                    <div class="bg-looper-green rounded-full w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-recycle text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-looper-green">Looper</h1>
+                        <p class="text-xs text-gray-500 hidden sm:block">Rescue Food, Save Planet</p>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-md mx-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for food, restaurants..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                               data-bind="searchQuery">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 text-gray-600 hover:text-looper-green">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-looper-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://pixabay.com/get/g67b2146534812c6c1f6f00c7d597cd116d14503b613e81596f2ed755322f43ffac64e7022b510e91e0641ab6edbb78dae08ad7c34eb70041b29de7f728c7111b_1280.jpg" 
+                             alt="User Avatar" class="w-8 h-8 rounded-full object-cover" data-bind="user.profilePicture">
+                        <span class="text-sm font-medium text-gray-700" data-bind="user.firstName">Aisha</span>
+                        <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: HeroSection [main value proposition and quick stats] -->
+    <section class="bg-gradient-to-br from-looper-green to-green-600 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Rescue delicious food, <span class="text-yellow-300">save money</span></h2>
+                    <p class="text-xl mb-6 text-green-100">Discover surplus food from top restaurants, hotels & bakeries at up to 60% off. Fight food waste while enjoying amazing meals.</p>
+                    
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold" data-bind="stats.totalMealsRescued">12,847</div>
+                            <div class="text-sm text-green-100">Meals Rescued</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold" data-bind="stats.co2Saved">24.3 tons</div>
+                            <div class="text-sm text-green-100">CO₂ Saved</div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold" data-bind="stats.activeBusiness">340+</div>
+                            <div class="text-sm text-green-100">Partner Businesses</div>
+                        </div>
+                    </div>
+
+                    <button class="bg-looper-orange hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+                            data-event="click:exploreDeals">
+                        Explore Deals Near You
+                    </button>
+                </div>
+                
+                <div class="hidden md:block">
+                    <!-- A vibrant display of various rescued food items arranged aesthetically -->
+                    <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
+                         alt="Delicious rescued food spread" class="rounded-2xl shadow-2xl w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: HeroSection -->
+
+    <!-- @COMPONENT: FilterBar [location, price, cuisine filters] -->
+    <section class="bg-white border-b border-gray-200 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-map-marker-alt text-looper-green"></i>
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                            data-bind="filters.location">
+                        <option>Lagos Island</option>
+                        <option>Victoria Island</option>
+                        <option>Ikeja</option>
+                        <option>Surulere</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-clock text-looper-orange"></i>
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                            data-bind="filters.timeWindow">
+                        <option>Available Now</option>
+                        <option>Next 2 Hours</option>
+                        <option>Today</option>
+                        <option>Tomorrow</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-utensils text-gray-600"></i>
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                            data-bind="filters.cuisine">
+                        <option>All Cuisines</option>
+                        <option>Nigerian</option>
+                        <option>Continental</option>
+                        <option>Asian</option>
+                        <option>Fast Food</option>
+                        <option>Bakery</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-leaf text-looper-green"></i>
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                            data-bind="filters.dietary">
+                        <option>All Dietary</option>
+                        <option>Vegetarian</option>
+                        <option>Halal</option>
+                        <option>Gluten-Free</option>
+                        <option>Vegan</option>
+                    </select>
+                </div>
+
+                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition-colors flex items-center space-x-2"
+                        data-event="click:openAdvancedFilters">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>More Filters</span>
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: FilterBar -->
+
+    <!-- @COMPONENT: FeaturedDeals [urgently expiring deals] -->
+    <section class="py-8 bg-gradient-to-r from-looper-orange/10 to-red-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">⚡ Ending Soon - Act Fast!</h3>
+                    <p class="text-gray-600">These deals expire within the next 2 hours</p>
+                </div>
+                <button class="text-looper-orange hover:text-orange-600 font-semibold">View All</button>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- @MAP: urgentDeals.map(deal => ( -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-red-200" data-mock="true">
+                    <div class="relative">
+                        <!-- Delicious Nigerian jollof rice with chicken and vegetables -->
+                        <img src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Jollof rice with chicken" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-error text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span data-bind="deal.timeRemaining">1h 23m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            60% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all"
+                                data-event="click:toggleFavorite">
+                            <i class="fas fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600" data-bind="deal.businessName">Mama Cass Kitchen</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs" title="Verified Business"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2" data-bind="deal.title">Chef's Special Jollof Rice Box</h4>
+                        <p class="text-sm text-gray-600 mb-3" data-bind="deal.description">4 portions of premium jollof rice with grilled chicken, plantain & salad</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green" data-bind="deal.discountedPrice">₦2,400</span>
+                                <span class="text-sm text-gray-500 line-through" data-bind="deal.originalPrice">₦6,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span data-bind="deal.distance">0.8km</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-looper-orange hover:bg-orange-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors"
+                                data-event="click:reserveItem">
+                            Reserve Now
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+
+                <!-- Similar cards for other urgent deals -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-red-200" data-mock="true">
+                    <div class="relative">
+                        <!-- Fresh baked artisanal bread loaves and pastries -->
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Fresh baked bread" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-error text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>45m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            50% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="fas fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Artisan Bakery Co.</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Mixed Bread Whoop Bag</h4>
+                        <p class="text-sm text-gray-600 mb-3">Surprise bag with 5-7 fresh baked breads & pastries</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦1,500</span>
+                                <span class="text-sm text-gray-500 line-through">₦3,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>1.2km</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-looper-orange hover:bg-orange-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Reserve Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-red-200" data-mock="true">
+                    <div class="relative">
+                        <!-- Gourmet hotel breakfast buffet spread with croissants and fruits -->
+                        <img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Hotel breakfast spread" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-error text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>2h 10m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            65% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Eko Hotel & Suites</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Luxury Breakfast Box</h4>
+                        <p class="text-sm text-gray-600 mb-3">Continental breakfast with croissants, fruits & coffee</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦3,500</span>
+                                <span class="text-sm text-gray-500 line-through">₦10,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>2.1km</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-looper-orange hover:bg-orange-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Reserve Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-red-200" data-mock="true">
+                    <div class="relative">
+                        <!-- Asian fusion sushi platter with various rolls and sashimi -->
+                        <img src="https://images.unsplash.com/photo-1563612116625-3012372fccce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Sushi platter" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-error text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>3h 5m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            55% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="fas fa-heart text-looper-orange"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Sakura Sushi Bar</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Chef's Sushi Selection</h4>
+                        <p class="text-sm text-gray-600 mb-3">12-piece assorted sushi & sashimi platter</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦4,500</span>
+                                <span class="text-sm text-gray-500 line-through">₦10,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>1.5km</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-looper-orange hover:bg-orange-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Reserve Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: FeaturedDeals -->
+
+    <!-- @COMPONENT: CategoriesGrid [browse by food type] -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Browse by Category</h3>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <!-- @MAP: categories.map(category => ( -->
+                <div class="text-center group cursor-pointer" data-event="click:browseCategory" data-mock="true">
+                    <div class="bg-gradient-to-br from-looper-green to-green-600 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-utensils text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Nigerian</h4>
+                    <p class="text-sm text-gray-500">47 deals</p>
+                </div>
+                <!-- @END_MAP )) -->
+
+                <div class="text-center group cursor-pointer" data-mock="true">
+                    <div class="bg-gradient-to-br from-looper-orange to-red-500 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-bread-slice text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Bakery</h4>
+                    <p class="text-sm text-gray-500">23 deals</p>
+                </div>
+
+                <div class="text-center group cursor-pointer" data-mock="true">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-coffee text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Breakfast</h4>
+                    <p class="text-sm text-gray-500">31 deals</p>
+                </div>
+
+                <div class="text-center group cursor-pointer" data-mock="true">
+                    <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-hamburger text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Fast Food</h4>
+                    <p class="text-sm text-gray-500">18 deals</p>
+                </div>
+
+                <div class="text-center group cursor-pointer" data-mock="true">
+                    <div class="bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-wine-glass-alt text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Fine Dining</h4>
+                    <p class="text-sm text-gray-500">12 deals</p>
+                </div>
+
+                <div class="text-center group cursor-pointer" data-mock="true">
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl p-6 mb-3 group-hover:shadow-lg transition-all">
+                        <i class="fas fa-fish text-white text-3xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 group-hover:text-looper-green transition-colors">Asian</h4>
+                    <p class="text-sm text-gray-500">9 deals</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: CategoriesGrid -->
+
+    <!-- @COMPONENT: AllListings [main food listing grid] -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-bold text-gray-900">All Available Deals</h3>
+                <div class="flex items-center space-x-4">
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-looper-green focus:border-transparent"
+                            data-bind="sorting.option">
+                        <option>Ending Soon</option>
+                        <option>Best Value</option>
+                        <option>Closest to You</option>
+                        <option>Highest Rated</option>
+                        <option>Newest</option>
+                    </select>
+                    <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+                        <button class="px-3 py-2 bg-looper-green text-white hover:bg-green-600 transition-colors" data-event="click:setGridView">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="px-3 py-2 bg-white text-gray-600 hover:bg-gray-50 transition-colors" data-event="click:setListView">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- @MAP: allListings.map(listing => ( -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow" data-mock="true">
+                    <div class="relative">
+                        <!-- Grilled chicken with yam and pepper sauce Nigerian dish -->
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Grilled chicken with yam" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-warning text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>4h 30m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            40% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Buka Express</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                            <div class="flex items-center space-x-1 text-xs text-yellow-500">
+                                <i class="fas fa-star"></i>
+                                <span>4.7</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Grilled Chicken & Yam</h4>
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Halal</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Gluten-Free</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Perfectly grilled chicken with roasted yam & spicy pepper sauce</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦1,800</span>
+                                <span class="text-sm text-gray-500 line-through">₦3,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>0.5km</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500">
+                            <i class="fas fa-leaf text-looper-green"></i>
+                            <span>Saves 1.2kg CO₂</span>
+                        </div>
+                        <button class="w-full bg-looper-green hover:bg-green-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+
+                <!-- Additional listing cards -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow" data-mock="true">
+                    <div class="relative">
+                        <!-- Gourmet pizza slices with various toppings and melted cheese -->
+                        <img src="https://pixabay.com/get/gebf6f6a86d7b43846df973fdaeca0da4c7967f6954928fb9091cea0fea83a1edbff4402fc6082fd33cd96b64b332044ee9bbdab91a84a6030405de7bbe2c0597_1280.jpg" 
+                             alt="Gourmet pizza slices" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-success text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>6h 15m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            35% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="fas fa-heart text-looper-orange"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Domino's Pizza VI</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                            <div class="flex items-center space-x-1 text-xs text-yellow-500">
+                                <i class="fas fa-star"></i>
+                                <span>4.3</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Large Pizza Surprise Box</h4>
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">Vegetarian</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Assorted pizza slices - could be pepperoni, margherita or supreme</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦3,250</span>
+                                <span class="text-sm text-gray-500 line-through">₦5,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>1.1km</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500">
+                            <i class="fas fa-leaf text-looper-green"></i>
+                            <span>Saves 2.1kg CO₂</span>
+                        </div>
+                        <button class="w-full bg-looper-green hover:bg-green-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow" data-mock="true">
+                    <div class="relative">
+                        <!-- Assorted pastries and croissants on a wooden board -->
+                        <img src="https://pixabay.com/get/g6909478faa24cb5960932e2a29df30d597222467545d621e038145060c853b1a395fbe3976470e7d04e77116aec7158d6733550507793c4f73bacc3f0077bfda_1280.jpg" 
+                             alt="Assorted pastries" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-success text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>5h 42m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            45% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">French Corner Bakery</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                            <div class="flex items-center space-x-1 text-xs text-yellow-500">
+                                <i class="fas fa-star"></i>
+                                <span>4.9</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Pastry Lover's Bundle</h4>
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Contains Nuts</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Contains Dairy</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">6-8 assorted pastries including croissants, danishes & muffins</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦2,200</span>
+                                <span class="text-sm text-gray-500 line-through">₦4,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>0.7km</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500">
+                            <i class="fas fa-leaf text-looper-green"></i>
+                            <span>Saves 1.8kg CO₂</span>
+                        </div>
+                        <button class="w-full bg-looper-green hover:bg-green-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow" data-mock="true">
+                    <div class="relative">
+                        <!-- Fresh fruit bowl with tropical fruits and berries -->
+                        <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=250" 
+                             alt="Fresh fruit bowl" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 left-3 bg-looper-success text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+                            <i class="fas fa-clock"></i>
+                            <span>3h 20m left</span>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-looper-green text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            30% OFF
+                        </div>
+                        <button class="absolute bottom-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all">
+                            <i class="far fa-heart text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="bg-looper-green w-2 h-2 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Fresh & Co. Supermarket</span>
+                            <i class="fas fa-check-circle text-looper-success text-xs"></i>
+                            <div class="flex items-center space-x-1 text-xs text-yellow-500">
+                                <i class="fas fa-star"></i>
+                                <span>4.5</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Premium Fruit Box</h4>
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Vegan</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Organic</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Mixed seasonal fruits: pineapple, mango, watermelon & berries</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-looper-green">₦2,100</span>
+                                <span class="text-sm text-gray-500 line-through">₦3,000</span>
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center space-x-1">
+                                <i class="fas fa-walking"></i>
+                                <span>1.8km</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500">
+                            <i class="fas fa-leaf text-looper-green"></i>
+                            <span>Saves 0.8kg CO₂</span>
+                        </div>
+                        <button class="w-full bg-looper-green hover:bg-green-600 text-white py-2 rounded-lg font-semibold mt-3 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button class="bg-looper-green hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+                        data-event="click:loadMoreListings">
+                    Load More Deals
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: AllListings -->
+
+    <!-- @COMPONENT: ImpactSection [user's environmental impact] -->
+    <section class="py-12 bg-gradient-to-br from-looper-green to-green-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold mb-4">Your Impact This Month</h3>
+                <p class="text-xl text-green-100">Together, we're making a difference!</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center bg-white/20 backdrop-blur rounded-2xl p-6">
+                    <div class="bg-white/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-3xl text-white"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-2" data-bind="userImpact.mealsRescued">23</div>
+                    <div class="text-green-100">Meals Rescued</div>
+                    <div class="text-sm text-green-200 mt-2">+5 from last month</div>
+                </div>
+
+                <div class="text-center bg-white/20 backdrop-blur rounded-2xl p-6">
+                    <div class="bg-white/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-leaf text-3xl text-white"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-2" data-bind="userImpact.co2Saved">34.7 kg</div>
+                    <div class="text-green-100">CO₂ Saved</div>
+                    <div class="text-sm text-green-200 mt-2">Equivalent to 150km driving</div>
+                </div>
+
+                <div class="text-center bg-white/20 backdrop-blur rounded-2xl p-6">
+                    <div class="bg-white/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-coins text-3xl text-white"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-2" data-bind="userImpact.moneySaved">₦47,200</div>
+                    <div class="text-green-100">Money Saved</div>
+                    <div class="text-sm text-green-200 mt-2">Average 52% off retail price</div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button class="bg-white text-looper-green hover:bg-gray-100 px-6 py-3 rounded-lg font-semibold transition-colors"
+                        data-event="click:shareImpact">
+                    Share Your Impact <i class="fas fa-share-alt ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ImpactSection -->
+
+    <!-- @COMPONENT: Footer [links and additional info] -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="bg-looper-green rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="fas fa-recycle text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-looper-green">Looper</h4>
+                            <p class="text-sm text-gray-400">Rescue Food, Save Planet</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">Fighting food waste while making quality meals accessible to everyone in Nigeria.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-looper-green transition-colors">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-looper-green transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-looper-green transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-looper-green transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">For Consumers</h5>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-looper-green transition-colors">How It Works</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Browse Deals</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Refer Friends</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Impact Dashboard</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Help Center</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">For Businesses</h5>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Partner With Us</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Business Dashboard</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Success Stories</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Best Practices</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Support</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Company</h5>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-looper-green transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Our Mission</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Press</a></li>
+                        <li><a href="#" class="hover:text-looper-green transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">&copy; 2024 Looper Nigeria. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-looper-green text-sm transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-looper-green text-sm transition-colors">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-looper-green text-sm transition-colors">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <!-- @COMPONENT: FloatingCart [cart summary] -->
+    <!-- @STATE: cartItems:array = [], cartTotal:number = 0, isCartOpen:boolean = false -->
+    <div class="fixed bottom-4 right-4 z-50" data-bind="cartItems.length > 0 ? 'block' : 'hidden'">
+        <button class="bg-looper-orange hover:bg-orange-600 text-white rounded-full p-4 shadow-lg flex items-center space-x-3 transition-all"
+                data-event="click:toggleCart">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <div class="hidden sm:block">
+                <div class="text-sm font-semibold" data-bind="cartItems.length">3 items</div>
+                <div class="text-xs" data-bind="cartTotal">₦7,500</div>
+            </div>
+            <div class="bg-white text-looper-orange rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold ml-2" data-bind="cartItems.length">3</div>
+        </button>
+    </div>
+    <!-- @END_COMPONENT: FloatingCart -->
+
+    <script>
+        (function() {
+            // TODO: Implement real-time countdown timers for deals
+            // TODO: Implement interactive filtering and search functionality  
+            // TODO: Implement cart management with local storage
+            // TODO: Implement geolocation for distance calculations
+            // TODO: Implement real-time availability updates via WebSocket
+            // TODO: Implement user authentication and profile management
+            // TODO: Implement favorites/wishlist functionality
+            // TODO: Implement push notification handling
+            // TODO: Implement payment processing with Paystack
+            // TODO: Implement order tracking and status updates
+            // TODO: Implement reviews and ratings system
+            // TODO: Implement impact tracking and analytics
+            // TODO: Implement business verification status checking
+            // TODO: Implement advanced search with autocomplete
+            // TODO: Implement map integration for location browsing
+            // TODO: Implement social sharing functionality
+            // TODO: Implement referral system
+            // TODO: Implement messaging system for customer support
+            
+            // Simple interaction handlers for demo purposes
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('[data-event]')) {
+                    const eventAttr = e.target.closest('[data-event]').getAttribute('data-event');
+                    console.log('Event triggered:', eventAttr);
+                    
+                    // Prevent actual navigation for demo
+                    e.preventDefault();
+                }
+            });
+
+            // Update countdown timers (demo functionality)
+            function updateCountdowns() {
+                document.querySelectorAll('[data-bind*="timeRemaining"]').forEach(function(element) {
+                    // Demo countdown update logic would go here
+                });
+            }
+            
+            setInterval(updateCountdowns, 60000); // Update every minute
+        })();
+    </script>
+</body>
+</html>
