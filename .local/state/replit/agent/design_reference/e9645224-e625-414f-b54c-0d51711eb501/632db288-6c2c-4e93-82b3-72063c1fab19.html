@@ -1,0 +1,1064 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looper Backend Architecture - Technical Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tech-blue': '#2563EB',
+                        'sustain-green': '#059669',
+                        'accent-orange': '#F59E0B',
+                        'dark-gray': '#374151',
+                        'light-bg': '#F9FAFB'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="font-inter bg-light-bg text-dark-gray">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-sustain-green rounded-lg flex items-center justify-center">
+                        <i class="fas fa-recycle text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-dark-gray">Looper Backend Architecture</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="px-3 py-1 bg-sustain-green/10 text-sustain-green rounded-full text-sm font-medium">PostgreSQL + Node.js</span>
+                    <span class="px-3 py-1 bg-tech-blue/10 text-tech-blue rounded-full text-sm font-medium">Modular & Scalable</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Architecture Overview -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">System Architecture Overview</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Client Layer -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-tech-blue border-b border-tech-blue/20 pb-2">Client Layer</h3>
+                        <div class="space-y-3">
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-mobile-alt text-tech-blue"></i>
+                                    <span class="font-medium">Consumer Mobile App</span>
+                                </div>
+                                <p class="text-sm text-gray-600">React Native/Flutter</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-laptop text-tech-blue"></i>
+                                    <span class="font-medium">Business Portal</span>
+                                </div>
+                                <p class="text-sm text-gray-600">React.js Web App</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-chart-line text-tech-blue"></i>
+                                    <span class="font-medium">Admin Dashboard</span>
+                                </div>
+                                <p class="text-sm text-gray-600">React.js Web App</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Layer -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-sustain-green border-b border-sustain-green/20 pb-2">API Gateway Layer</h3>
+                        <div class="space-y-3">
+                            <div class="p-4 bg-sustain-green/5 rounded-lg border border-sustain-green/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-shield-alt text-sustain-green"></i>
+                                    <span class="font-medium">Authentication Gateway</span>
+                                </div>
+                                <p class="text-sm text-gray-600">JWT, Rate Limiting, CORS</p>
+                            </div>
+                            <div class="p-4 bg-sustain-green/5 rounded-lg border border-sustain-green/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-route text-sustain-green"></i>
+                                    <span class="font-medium">API Router</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Express.js Routing</p>
+                            </div>
+                            <div class="p-4 bg-sustain-green/5 rounded-lg border border-sustain-green/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-balance-scale text-sustain-green"></i>
+                                    <span class="font-medium">Load Balancer</span>
+                                </div>
+                                <p class="text-sm text-gray-600">NGINX/HAProxy</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Layer -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-accent-orange border-b border-accent-orange/20 pb-2">Service Layer</h3>
+                        <div class="space-y-3">
+                            <div class="p-4 bg-accent-orange/5 rounded-lg border border-accent-orange/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-database text-accent-orange"></i>
+                                    <span class="font-medium">PostgreSQL Database</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Primary Data Store</p>
+                            </div>
+                            <div class="p-4 bg-accent-orange/5 rounded-lg border border-accent-orange/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-memory text-accent-orange"></i>
+                                    <span class="font-medium">Redis Cache</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Session & Data Cache</p>
+                            </div>
+                            <div class="p-4 bg-accent-orange/5 rounded-lg border border-accent-orange/20">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <i class="fas fa-tasks text-accent-orange"></i>
+                                    <span class="font-medium">Background Jobs</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Bull Queue + Redis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modular Components -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">Modular Component Architecture</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Auth Module -->
+                    <div class="p-6 border border-tech-blue/20 rounded-xl bg-tech-blue/5">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-tech-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-shield text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-tech-blue">Auth Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• JWT Authentication</li>
+                            <li>• Role-based Access</li>
+                            <li>• Password Management</li>
+                            <li>• OAuth Integration</li>
+                            <li>• Session Management</li>
+                        </ul>
+                    </div>
+
+                    <!-- User Management -->
+                    <div class="p-6 border border-sustain-green/20 rounded-xl bg-sustain-green/5">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-sustain-green rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-sustain-green">User Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Profile Management</li>
+                            <li>• Business Verification</li>
+                            <li>• Consumer Onboarding</li>
+                            <li>• KYC Workflows</li>
+                            <li>• User Analytics</li>
+                        </ul>
+                    </div>
+
+                    <!-- Food Listing -->
+                    <div class="p-6 border border-accent-orange/20 rounded-xl bg-accent-orange/5">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-accent-orange rounded-lg flex items-center justify-center">
+                                <i class="fas fa-utensils text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-accent-orange">Food Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Surplus Listing</li>
+                            <li>• Image Management</li>
+                            <li>• Inventory Tracking</li>
+                            <li>• Expiry Management</li>
+                            <li>• Search & Filters</li>
+                        </ul>
+                    </div>
+
+                    <!-- Order Management -->
+                    <div class="p-6 border border-purple-500/20 rounded-xl bg-purple-50">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-purple-500">Order Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Order Processing</li>
+                            <li>• Status Tracking</li>
+                            <li>• Pickup Scheduling</li>
+                            <li>• QR Code Generation</li>
+                            <li>• Order History</li>
+                        </ul>
+                    </div>
+
+                    <!-- Payment System -->
+                    <div class="p-6 border border-green-500/20 rounded-xl bg-green-50">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-credit-card text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-green-500">Payment Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Paystack Integration</li>
+                            <li>• Transaction Logging</li>
+                            <li>• Refund Processing</li>
+                            <li>• Payout Management</li>
+                            <li>• Financial Reports</li>
+                        </ul>
+                    </div>
+
+                    <!-- Notification System -->
+                    <div class="p-6 border border-blue-500/20 rounded-xl bg-blue-50">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-bell text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-blue-500">Notification Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Push Notifications</li>
+                            <li>• Email Service</li>
+                            <li>• SMS Integration</li>
+                            <li>• Real-time Updates</li>
+                            <li>• Notification Templates</li>
+                        </ul>
+                    </div>
+
+                    <!-- Geolocation -->
+                    <div class="p-6 border border-red-500/20 rounded-xl bg-red-50">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-red-500">Location Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• GPS Integration</li>
+                            <li>• Distance Calculations</li>
+                            <li>• Location-based Search</li>
+                            <li>• Geofencing</li>
+                            <li>• Map Services</li>
+                        </ul>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="p-6 border border-indigo-500/20 rounded-xl bg-indigo-50">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-white"></i>
+                            </div>
+                            <h3 class="font-semibold text-indigo-500">Analytics Module</h3>
+                        </div>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li>• Waste Tracking</li>
+                            <li>• Impact Metrics</li>
+                            <li>• Business Intelligence</li>
+                            <li>• Performance Monitoring</li>
+                            <li>• Report Generation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Database Schema -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">Database Schema Design</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Core Tables -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-semibold text-tech-blue">Core Tables</h3>
+                        
+                        <!-- Users Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-tech-blue mr-2"></i>
+                                users
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">email</span> <span class="text-gray-500">VARCHAR UNIQUE</span></div>
+                                <div><span class="text-sustain-green">phone</span> <span class="text-gray-500">VARCHAR UNIQUE</span></div>
+                                <div><span class="text-sustain-green">password_hash</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">user_type</span> <span class="text-gray-500">ENUM(consumer, business, admin)</span></div>
+                                <div><span class="text-sustain-green">is_verified</span> <span class="text-gray-500">BOOLEAN DEFAULT FALSE</span></div>
+                                <div><span class="text-sustain-green">created_at</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                                <div><span class="text-sustain-green">updated_at</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Businesses Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-tech-blue mr-2"></i>
+                                businesses
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">user_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">business_name</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">business_type</span> <span class="text-gray-500">ENUM(restaurant, hotel, bakery, supermarket)</span></div>
+                                <div><span class="text-sustain-green">address</span> <span class="text-gray-500">TEXT</span></div>
+                                <div><span class="text-sustain-green">latitude</span> <span class="text-gray-500">DECIMAL(10,8)</span></div>
+                                <div><span class="text-sustain-green">longitude</span> <span class="text-gray-500">DECIMAL(11,8)</span></div>
+                                <div><span class="text-sustain-green">verification_status</span> <span class="text-gray-500">ENUM(pending, verified, rejected)</span></div>
+                                <div><span class="text-sustain-green">rating</span> <span class="text-gray-500">DECIMAL(3,2)</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Food Listings Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-tech-blue mr-2"></i>
+                                food_listings
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">business_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">title</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">description</span> <span class="text-gray-500">TEXT</span></div>
+                                <div><span class="text-sustain-green">original_price</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                                <div><span class="text-sustain-green">discounted_price</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                                <div><span class="text-sustain-green">quantity_available</span> <span class="text-gray-500">INTEGER</span></div>
+                                <div><span class="text-sustain-green">expiry_time</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                                <div><span class="text-sustain-green">pickup_start</span> <span class="text-gray-500">TIME</span></div>
+                                <div><span class="text-sustain-green">pickup_end</span> <span class="text-gray-500">TIME</span></div>
+                                <div><span class="text-sustain-green">status</span> <span class="text-gray-500">ENUM(active, sold_out, expired)</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transactional Tables -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-semibold text-accent-orange">Transactional Tables</h3>
+                        
+                        <!-- Orders Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-accent-orange mr-2"></i>
+                                orders
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">user_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">business_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">total_amount</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                                <div><span class="text-sustain-green">status</span> <span class="text-gray-500">ENUM(pending, confirmed, ready, completed, cancelled)</span></div>
+                                <div><span class="text-sustain-green">pickup_time</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                                <div><span class="text-sustain-green">qr_code</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">created_at</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-accent-orange mr-2"></i>
+                                order_items
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">order_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">food_listing_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">quantity</span> <span class="text-gray-500">INTEGER</span></div>
+                                <div><span class="text-sustain-green">unit_price</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                                <div><span class="text-sustain-green">subtotal</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Payments Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-accent-orange mr-2"></i>
+                                payments
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">order_id</span> <span class="text-gray-500">UUID FOREIGN KEY</span></div>
+                                <div><span class="text-sustain-green">payment_reference</span> <span class="text-gray-500">VARCHAR UNIQUE</span></div>
+                                <div><span class="text-sustain-green">payment_method</span> <span class="text-gray-500">ENUM(card, transfer, wallet)</span></div>
+                                <div><span class="text-sustain-green">amount</span> <span class="text-gray-500">DECIMAL(10,2)</span></div>
+                                <div><span class="text-sustain-green">status</span> <span class="text-gray-500">ENUM(pending, success, failed)</span></div>
+                                <div><span class="text-sustain-green">paystack_reference</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">processed_at</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Table -->
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-dark-gray mb-3 flex items-center">
+                                <i class="fas fa-table text-accent-orange mr-2"></i>
+                                analytics_events
+                            </h4>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div><span class="text-sustain-green">id</span> <span class="text-gray-500">UUID PRIMARY KEY</span></div>
+                                <div><span class="text-sustain-green">event_type</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">entity_id</span> <span class="text-gray-500">UUID</span></div>
+                                <div><span class="text-sustain-green">entity_type</span> <span class="text-gray-500">VARCHAR</span></div>
+                                <div><span class="text-sustain-green">metadata</span> <span class="text-gray-500">JSONB</span></div>
+                                <div><span class="text-sustain-green">created_at</span> <span class="text-gray-500">TIMESTAMP</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Endpoints -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">RESTful API Endpoints</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Authentication Endpoints -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-tech-blue border-b border-tech-blue/20 pb-2">Authentication & Users</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/auth/register</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">User registration (consumer/business)</p>
+                            </div>
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/auth/login</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">User authentication</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/users/profile</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Get user profile information</p>
+                            </div>
+                            <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">PUT /api/users/profile</span>
+                                    <span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">PUT</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Update user profile</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Endpoints -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-sustain-green border-b border-sustain-green/20 pb-2">Business Management</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/businesses</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Register business profile</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/businesses/:id</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Get business details</p>
+                            </div>
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/businesses/:id/verify</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Submit verification documents</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/businesses/:id/analytics</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Business performance analytics</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Food Listings Endpoints -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-accent-orange border-b border-accent-orange/20 pb-2">Food Listings</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/food-listings</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Create new food listing</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/food-listings</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Browse available food listings</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/food-listings/search</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Search with filters & geolocation</p>
+                            </div>
+                            <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">PUT /api/food-listings/:id</span>
+                                    <span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">PUT</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Update listing details</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order & Payment Endpoints -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-purple-600 border-b border-purple-200 pb-2">Orders & Payments</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/orders</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Create new order</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">GET /api/orders/:id</span>
+                                    <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">GET</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Get order details</p>
+                            </div>
+                            <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">PUT /api/orders/:id/status</span>
+                                    <span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">PUT</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Update order status</p>
+                            </div>
+                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-mono text-sm">POST /api/payments/initialize</span>
+                                    <span class="px-2 py-1 bg-green-500 text-white text-xs rounded">POST</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Initialize Paystack payment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">Technology Stack & Dependencies</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Core Framework -->
+                    <div class="p-6 bg-tech-blue/5 border border-tech-blue/20 rounded-xl">
+                        <h3 class="font-semibold text-tech-blue mb-4">Core Framework</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fab fa-node-js text-green-600"></i>
+                                <span>Node.js v18+</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-server text-tech-blue"></i>
+                                <span>Express.js v4.18+</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-shield-alt text-sustain-green"></i>
+                                <span>Helmet.js (Security)</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-tachometer-alt text-accent-orange"></i>
+                                <span>Compression (Performance)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Database & ORM -->
+                    <div class="p-6 bg-sustain-green/5 border border-sustain-green/20 rounded-xl">
+                        <h3 class="font-semibold text-sustain-green mb-4">Database & ORM</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-database text-blue-600"></i>
+                                <span>PostgreSQL v14+</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-layer-group text-sustain-green"></i>
+                                <span>Prisma ORM</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-memory text-red-500"></i>
+                                <span>Redis v7+</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-arrows-alt text-accent-orange"></i>
+                                <span>Connection Pooling</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Authentication & Security -->
+                    <div class="p-6 bg-accent-orange/5 border border-accent-orange/20 rounded-xl">
+                        <h3 class="font-semibold text-accent-orange mb-4">Auth & Security</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-key text-yellow-600"></i>
+                                <span>JWT (jsonwebtoken)</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-lock text-red-600"></i>
+                                <span>bcrypt</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-shield text-blue-600"></i>
+                                <span>express-rate-limit</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-check-circle text-green-600"></i>
+                                <span>joi (Validation)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- External Services -->
+                    <div class="p-6 bg-purple-50 border border-purple-200 rounded-xl">
+                        <h3 class="font-semibold text-purple-600 mb-4">External Services</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-credit-card text-green-600"></i>
+                                <span>Paystack API</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-map-marker-alt text-red-600"></i>
+                                <span>Google Maps API</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-cloud text-blue-600"></i>
+                                <span>Cloudinary (Images)</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-envelope text-orange-600"></i>
+                                <span>SendGrid (Email)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Background Jobs -->
+                    <div class="p-6 bg-green-50 border border-green-200 rounded-xl">
+                        <h3 class="font-semibold text-green-600 mb-4">Background Jobs</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-tasks text-blue-600"></i>
+                                <span>Bull Queue</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-bell text-yellow-600"></i>
+                                <span>Push Notifications</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-clock text-purple-600"></i>
+                                <span>Cron Jobs</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-chart-line text-green-600"></i>
+                                <span>Analytics Processing</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- DevOps & Monitoring -->
+                    <div class="p-6 bg-gray-50 border border-gray-200 rounded-xl">
+                        <h3 class="font-semibold text-gray-700 mb-4">DevOps & Monitoring</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <i class="fab fa-docker text-blue-600"></i>
+                                <span>Docker</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-file-alt text-green-600"></i>
+                                <span>Winston (Logging)</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-heartbeat text-red-600"></i>
+                                <span>Health Checks</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <i class="fas fa-bug text-orange-600"></i>
+                                <span>Error Tracking</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deployment Architecture -->
+        <section class="mb-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">Deployment & Scalability Architecture</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Production Environment -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-semibold text-tech-blue">Production Environment</h3>
+                        <div class="space-y-4">
+                            <!-- Load Balancer -->
+                            <div class="p-4 border border-tech-blue/20 rounded-lg bg-tech-blue/5">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-tech-blue rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-balance-scale text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-tech-blue">Load Balancer (NGINX)</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• SSL Termination</li>
+                                    <li>• Request Distribution</li>
+                                    <li>• Health Check Monitoring</li>
+                                    <li>• Static Asset Serving</li>
+                                </ul>
+                            </div>
+
+                            <!-- Application Servers -->
+                            <div class="p-4 border border-sustain-green/20 rounded-lg bg-sustain-green/5">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-sustain-green rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-server text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-sustain-green">Application Servers (3x)</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Node.js + Express.js</li>
+                                    <li>• Horizontal Auto-scaling</li>
+                                    <li>• PM2 Process Manager</li>
+                                    <li>• Docker Containers</li>
+                                </ul>
+                            </div>
+
+                            <!-- Database Cluster -->
+                            <div class="p-4 border border-accent-orange/20 rounded-lg bg-accent-orange/5">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-accent-orange rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-database text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-accent-orange">Database Cluster</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• PostgreSQL Master-Slave</li>
+                                    <li>• Read Replicas (2x)</li>
+                                    <li>• Automated Backups</li>
+                                    <li>• Connection Pooling</li>
+                                </ul>
+                            </div>
+
+                            <!-- Cache Layer -->
+                            <div class="p-4 border border-red-500/20 rounded-lg bg-red-50">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-memory text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-red-500">Redis Cache Cluster</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Session Management</li>
+                                    <li>• API Response Caching</li>
+                                    <li>• Real-time Data</li>
+                                    <li>• Queue Management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring & DevOps -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-semibold text-purple-600">Monitoring & DevOps</h3>
+                        <div class="space-y-4">
+                            <!-- CI/CD Pipeline -->
+                            <div class="p-4 border border-purple-500/20 rounded-lg bg-purple-50">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-rocket text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-purple-500">CI/CD Pipeline</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• GitHub Actions</li>
+                                    <li>• Automated Testing</li>
+                                    <li>• Docker Build & Push</li>
+                                    <li>• Zero-downtime Deployment</li>
+                                </ul>
+                            </div>
+
+                            <!-- Monitoring Stack -->
+                            <div class="p-4 border border-blue-500/20 rounded-lg bg-blue-50">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-blue-500">Monitoring & Logging</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Application Performance Monitoring</li>
+                                    <li>• Centralized Logging (ELK Stack)</li>
+                                    <li>• Real-time Alerts</li>
+                                    <li>• Health Dashboard</li>
+                                </ul>
+                            </div>
+
+                            <!-- Security Layer -->
+                            <div class="p-4 border border-green-500/20 rounded-lg bg-green-50">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-green-500">Security Layer</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• WAF (Web Application Firewall)</li>
+                                    <li>• DDoS Protection</li>
+                                    <li>• SSL/TLS Encryption</li>
+                                    <li>• Security Scanning</li>
+                                </ul>
+                            </div>
+
+                            <!-- Backup & Recovery -->
+                            <div class="p-4 border border-gray-500/20 rounded-lg bg-gray-50">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-save text-white text-xs"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-500">Backup & Recovery</h4>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Daily Automated Backups</li>
+                                    <li>• Point-in-time Recovery</li>
+                                    <li>• Multi-region Replication</li>
+                                    <li>• Disaster Recovery Plan</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Workflow -->
+        <section>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 class="text-3xl font-bold mb-6 text-dark-gray">Development Workflow & Testing Strategy</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Development Process -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-tech-blue border-b border-tech-blue/20 pb-2">Development Process</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-tech-blue/5 border border-tech-blue/20 rounded-lg">
+                                <h4 class="font-medium text-tech-blue mb-2">1. Feature Branch Workflow</h4>
+                                <p class="text-sm text-gray-600">Git branching strategy with feature isolation</p>
+                            </div>
+                            <div class="p-3 bg-tech-blue/5 border border-tech-blue/20 rounded-lg">
+                                <h4 class="font-medium text-tech-blue mb-2">2. Code Review Process</h4>
+                                <p class="text-sm text-gray-600">Mandatory peer reviews before merging</p>
+                            </div>
+                            <div class="p-3 bg-tech-blue/5 border border-tech-blue/20 rounded-lg">
+                                <h4 class="font-medium text-tech-blue mb-2">3. Automated Testing</h4>
+                                <p class="text-sm text-gray-600">Unit, integration, and API tests</p>
+                            </div>
+                            <div class="p-3 bg-tech-blue/5 border border-tech-blue/20 rounded-lg">
+                                <h4 class="font-medium text-tech-blue mb-2">4. Staging Deployment</h4>
+                                <p class="text-sm text-gray-600">Pre-production environment validation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testing Strategy -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-sustain-green border-b border-sustain-green/20 pb-2">Testing Strategy</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-sustain-green/5 border border-sustain-green/20 rounded-lg">
+                                <h4 class="font-medium text-sustain-green mb-2">Unit Tests (Jest)</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Service layer testing</li>
+                                    <li>• Utility function validation</li>
+                                    <li>• 90%+ code coverage target</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-sustain-green/5 border border-sustain-green/20 rounded-lg">
+                                <h4 class="font-medium text-sustain-green mb-2">Integration Tests</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Database interactions</li>
+                                    <li>• External API integrations</li>
+                                    <li>• Module communication</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-sustain-green/5 border border-sustain-green/20 rounded-lg">
+                                <h4 class="font-medium text-sustain-green mb-2">API Tests (Supertest)</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Endpoint validation</li>
+                                    <li>• Authentication testing</li>
+                                    <li>• Error handling verification</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Assurance -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-accent-orange border-b border-accent-orange/20 pb-2">Quality Assurance</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-accent-orange/5 border border-accent-orange/20 rounded-lg">
+                                <h4 class="font-medium text-accent-orange mb-2">Code Quality</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• ESLint + Prettier</li>
+                                    <li>• Husky pre-commit hooks</li>
+                                    <li>• SonarQube analysis</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-accent-orange/5 border border-accent-orange/20 rounded-lg">
+                                <h4 class="font-medium text-accent-orange mb-2">Security Scanning</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Dependency vulnerability checks</li>
+                                    <li>• SAST (Static Analysis)</li>
+                                    <li>• DAST (Dynamic Analysis)</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-accent-orange/5 border border-accent-orange/20 rounded-lg">
+                                <h4 class="font-medium text-accent-orange mb-2">Performance Testing</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Load testing with Artillery</li>
+                                    <li>• Database query optimization</li>
+                                    <li>• API response time monitoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentation Note -->
+                <div class="mt-8 p-6 bg-gradient-to-r from-sustain-green/10 to-tech-blue/10 border border-sustain-green/20 rounded-xl">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-sustain-green rounded-lg flex items-center justify-center">
+                            <i class="fas fa-book text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-sustain-green">API Documentation & Standards</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium text-dark-gray mb-2">Documentation Tools</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• Swagger/OpenAPI 3.0 specification</li>
+                                <li>• Interactive API documentation</li>
+                                <li>• Postman collection exports</li>
+                                <li>• Automated schema validation</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-dark-gray mb-2">Development Standards</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• RESTful API design principles</li>
+                                <li>• Consistent error response formats</li>
+                                <li>• Comprehensive input validation</li>
+                                <li>• Rate limiting and security middleware</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark-gray text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <div class="w-8 h-8 bg-sustain-green rounded-lg flex items-center justify-center">
+                        <i class="fas fa-recycle text-white text-sm"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Looper Backend Architecture</h3>
+                </div>
+                <p class="text-gray-400 mb-4">Sustainable, Scalable, and Modular Backend Design</p>
+                <div class="flex items-center justify-center space-x-6 text-sm">
+                    <span class="flex items-center space-x-2">
+                        <i class="fab fa-node-js text-green-400"></i>
+                        <span>Node.js + Express</span>
+                    </span>
+                    <span class="flex items-center space-x-2">
+                        <i class="fas fa-database text-blue-400"></i>
+                        <span>PostgreSQL</span>
+                    </span>
+                    <span class="flex items-center space-x-2">
+                        <i class="fas fa-memory text-red-400"></i>
+                        <span>Redis Cache</span>
+                    </span>
+                    <span class="flex items-center space-x-2">
+                        <i class="fab fa-docker text-blue-400"></i>
+                        <span>Docker</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // TODO: Implement interactive diagram functionality for real implementation
+        // TODO: Add dynamic API endpoint testing interface
+        // TODO: Implement real-time system monitoring dashboard
+        
+        // Simple interaction for demonstration
+        (function() {
+            // Add hover effects for module cards
+            const moduleCards = document.querySelectorAll('[class*="border-"][class*="/20"]');
+            moduleCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Smooth scrolling for internal navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
