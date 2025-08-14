@@ -211,4 +211,112 @@ router.post('/', authenticateJWT, requireBusinessAccess, upload.array('media'), 
   }
 });
 
+/**
+ * @swagger
+ * /api/listings/{id}:
+ *   put:
+ *     summary: Update a food listing (Business only)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Listing ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               originalPrice:
+ *                 type: string
+ *               discountedPrice:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *               pickupWindowStart:
+ *                 type: string
+ *                 format: date-time
+ *               pickupWindowEnd:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [active, sold_out, expired, cancelled]
+ *               media:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       200:
+ *         description: Listing updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Listing not found
+ */
+router.put('/:id', authenticateJWT, requireBusinessAccess, upload.array('media'), validateRequest(z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  originalPrice: z.string().optional(),
+  discountedPrice: z.string().optional(),
+  quantity: z.number().optional(),
+  availableQuantity: z.number().optional(),
+  pickupWindowStart: z.string().optional(),
+  pickupWindowEnd: z.string().optional(),
+  status: z.enum(["active", "sold_out", "expired", "cancelled"]).optional(),
+})), async (req: any, res) => {
+  try {
+    const media = req.files?.map((file: any) => ({ url: file.path, type: file.mimetype }));
+    const listing = await listingService.updateListing(req.params.id, { ...req.body, media });
+    res.json(listing);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update listing" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/listings/{id}:
+ *   delete:
+ *     summary: Delete a food listing (Business only)
+ *     tags: [Listings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Listing ID
+ *     responses:
+ *       200:
+ *         description: Listing deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Listing not found
+ */
+router.delete('/:id', authenticateJWT, requireBusinessAccess, async (req: any, res) => {
+  try {
+    await listingService.deleteListing(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete listing" });
+  }
+});
+
 export default router;

@@ -655,3 +655,15 @@
 {"timestamp":"2025-08-14T07:38:27.288Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":6,"statusCode":200}}
 {"timestamp":"2025-08-14T07:38:27.522Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":2,"statusCode":304}}
 {"timestamp":"2025-08-14T07:38:27.590Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":12,"statusCode":200}}
+{"timestamp":"2025-08-14T07:46:31.272Z","level":"INFO","message":"Performance middleware configured"}
+{"timestamp":"2025-08-14T07:47:08.627Z","level":"INFO","message":"Performance middleware configured"}
+{"timestamp":"2025-08-14T07:47:08.703Z","level":"INFO","message":"Looper server started on port 5000","metadata":{"environment":"development","port":5000,"timestamp":"2025-08-14T07:47:08.703Z"}}
+{"timestamp":"2025-08-14T07:47:32.612Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":11,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:32.686Z","level":"INFO","message":"API Request: GET /swagger-ui.css","metadata":{"method":"GET","path":"/swagger-ui.css","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:32.700Z","level":"INFO","message":"API Request: GET /swagger-ui-bundle.js","metadata":{"method":"GET","path":"/swagger-ui-bundle.js","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:32.712Z","level":"INFO","message":"API Request: GET /swagger-ui-standalone-preset.js","metadata":{"method":"GET","path":"/swagger-ui-standalone-preset.js","responseTime":14,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:32.718Z","level":"INFO","message":"API Request: GET /swagger-ui-init.js","metadata":{"method":"GET","path":"/swagger-ui-init.js","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:34.365Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:34.835Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T07:47:34.914Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":26,"statusCode":200}}
+{"timestamp":"2025-08-14T07:47:35.050Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":3,"statusCode":304}}

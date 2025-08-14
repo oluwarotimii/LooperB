@@ -3,8 +3,26 @@ import { authenticateJWT, requireRole } from '../middleware/auth';
 import { logger, LogLevel } from '../utils/logger';
 import { storage } from '../storage';
 
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Admin-only endpoints for system management
+ */
+
 export function registerAdminRoutes(router: Router) {
-  // Admin system health endpoint
+  /**
+   * @swagger
+   * /api/admin/system-health:
+   *   get:
+   *     summary: Get system health
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: System health status
+   */
   router.get('/system-health', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const logs = logger.getLogStats(24); // Last 24 hours
@@ -45,7 +63,31 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
-  // Get recent application logs
+  /**
+   * @swagger
+   * /api/admin/logs:
+   *   get:
+   *     summary: Get recent application logs
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: level
+   *         schema:
+   *           type: string
+   *           enum: [info, warn, error]
+   *         description: Log level to filter by
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 100
+   *         description: Number of logs to return
+   *     responses:
+   *       200:
+   *         description: A list of recent logs
+   */
   router.get('/logs', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const { level, limit = 100 } = req.query;
@@ -62,7 +104,18 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
-  // Business verification management
+  /**
+   * @swagger
+   * /api/admin/businesses/pending:
+   *   get:
+   *     summary: Get pending businesses for verification
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: A list of pending businesses
+   */
   router.get('/businesses/pending', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const pendingBusinesses = await storage.searchBusinesses('', { 
@@ -79,6 +132,36 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
+  /**
+   * @swagger
+   * /api/admin/businesses/{id}/verify:
+   *   post:
+   *     summary: Verify or reject a business
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the business to verify
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               approved:
+   *                 type: boolean
+   *               reason:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Business verification status updated successfully
+   */
   router.post('/businesses/:id/verify', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const { id } = req.params;
@@ -112,7 +195,18 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
-  // User management
+  /**
+   * @swagger
+   * /api/admin/users/stats:
+   *   get:
+   *     summary: Get user statistics
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: User statistics
+   */
   router.get('/users/stats', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const allUsers = await storage.searchUsers('', {});
@@ -132,7 +226,25 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
-  // Platform analytics
+  /**
+   * @swagger
+   * /api/admin/analytics:
+   *   get:
+   *     summary: Get platform analytics
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: period
+   *         schema:
+   *           type: string
+   *           default: 30d
+   *         description: The time period for the analytics
+   *     responses:
+   *       200:
+   *         description: Platform analytics data
+   */
   router.get('/analytics', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const { period = '30d' } = req.query;
@@ -172,7 +284,18 @@ export function registerAdminRoutes(router: Router) {
     }
   });
 
-  // Content moderation
+  /**
+   * @swagger
+   * /api/admin/reports:
+   *   get:
+   *     summary: Get content moderation reports
+   *     tags: [Admin]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: A list of content moderation reports
+   */
   router.get('/reports', authenticateJWT, requireRole('admin'), async (req, res) => {
     try {
       const reports: any[] = []; // Would implement reporting system in storage layer
