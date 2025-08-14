@@ -87,6 +87,32 @@ router.put('/profile', authenticateJWT, validateRequest(z.object({
 
 /**
  * @swagger
+ * /api/users/profile:
+ *   delete:
+ *     summary: Delete user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.delete('/profile', authenticateJWT, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    await userService.deleteUserProfile(userId);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete user profile" });
+  }
+});
+
+/**
+ * @swagger
  * /api/users/impact:
  *   get:
  *     summary: Get user impact data

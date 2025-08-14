@@ -178,6 +178,30 @@ export class BusinessService {
       });
     }
   }
+
+  async deleteBusiness(businessId: string): Promise<void> {
+    // First, get all users associated with the business to notify them
+    const businessUsers = await storage.getBusinessUsers(businessId);
+    const business = await storage.getBusiness(businessId);
+
+    // Delete the business from storage
+    await storage.deleteBusiness(businessId);
+
+    // Notify all business users
+    if (business) {
+      for (const businessUser of businessUsers) {
+        await notificationService.createNotification({
+          userId: businessUser.userId,
+          title: "Business Deleted",
+          message: `The business "${business.businessName}" has been deleted.`,
+          type: "system",
+          priority: "high",
+          relatedEntityId: businessId,
+          relatedEntityType: "business",
+        });
+      }
+    }
+  }
 }
 
 export const businessService = new BusinessService();

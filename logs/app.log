@@ -667,3 +667,28 @@
 {"timestamp":"2025-08-14T07:47:34.835Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":1,"statusCode":304}}
 {"timestamp":"2025-08-14T07:47:34.914Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":26,"statusCode":200}}
 {"timestamp":"2025-08-14T07:47:35.050Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:34.422Z","level":"INFO","message":"Performance middleware configured"}
+{"timestamp":"2025-08-14T08:04:34.527Z","level":"INFO","message":"Looper server started on port 5000","metadata":{"environment":"development","port":5000,"timestamp":"2025-08-14T08:04:34.527Z"}}
+{"timestamp":"2025-08-14T08:04:49.860Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":14,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:49.939Z","level":"INFO","message":"API Request: GET /swagger-ui.css","metadata":{"method":"GET","path":"/swagger-ui.css","responseTime":14,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:49.957Z","level":"INFO","message":"API Request: GET /swagger-ui-bundle.js","metadata":{"method":"GET","path":"/swagger-ui-bundle.js","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:49.963Z","level":"INFO","message":"API Request: GET /swagger-ui-standalone-preset.js","metadata":{"method":"GET","path":"/swagger-ui-standalone-preset.js","responseTime":7,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:50.024Z","level":"INFO","message":"API Request: GET /swagger-ui-init.js","metadata":{"method":"GET","path":"/swagger-ui-init.js","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:52.316Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":2,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:53.000Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T08:04:53.063Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":26,"statusCode":200}}
+{"timestamp":"2025-08-14T08:04:53.143Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":5,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:20.495Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":17,"statusCode":301}}
+{"timestamp":"2025-08-14T08:16:20.516Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":4,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:20.604Z","level":"INFO","message":"API Request: GET /swagger-ui.css","metadata":{"method":"GET","path":"/swagger-ui.css","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:20.631Z","level":"INFO","message":"API Request: GET /swagger-ui-bundle.js","metadata":{"method":"GET","path":"/swagger-ui-bundle.js","responseTime":29,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:20.701Z","level":"INFO","message":"API Request: GET /swagger-ui-init.js","metadata":{"method":"GET","path":"/swagger-ui-init.js","responseTime":2,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:20.707Z","level":"INFO","message":"API Request: GET /swagger-ui-standalone-preset.js","metadata":{"method":"GET","path":"/swagger-ui-standalone-preset.js","responseTime":9,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:22.293Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":2,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:22.764Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T08:16:22.791Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":2,"statusCode":304}}
+{"timestamp":"2025-08-14T08:19:58.909Z","level":"INFO","message":"API Request: POST /register","metadata":{"method":"POST","path":"/register","responseTime":2756,"statusCode":201}}
+{"timestamp":"2025-08-14T08:19:58.911Z","level":"WARN","message":"Slow API request","metadata":{"method":"POST","path":"/register","duration":"2758.3454ms"}}
+{"timestamp":"2025-08-14T08:21:53.792Z","level":"INFO","message":"API Request: GET /profile","metadata":{"method":"GET","path":"/profile","userId":"fc618417-f0d5-4f47-8a52-012be0257097","responseTime":693,"statusCode":200}}
+{"timestamp":"2025-08-14T11:48:04.917Z","level":"INFO","message":"Performance middleware configured"}
+{"timestamp":"2025-08-14T11:48:05.009Z","level":"INFO","message":"Looper server started on port 5000","metadata":{"environment":"development","port":5000,"timestamp":"2025-08-14T11:48:05.009Z"}}

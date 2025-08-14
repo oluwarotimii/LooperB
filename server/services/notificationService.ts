@@ -220,6 +220,16 @@ export class NotificationService {
 
     return stats;
   }
+
+  async deleteNotification(notificationId: string, userId: string): Promise<boolean> {
+    const notification = await storage.getNotification(notificationId);
+    
+    if (!notification || notification.userId !== userId) {
+      return false;
+    }
+
+    return await storage.deleteNotification(notificationId);
+  }
 }
 
 export const notificationService = new NotificationService();

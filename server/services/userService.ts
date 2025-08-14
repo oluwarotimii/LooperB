@@ -90,6 +90,12 @@ export class UserService {
       priority: "high",
     });
   }
+
+  async deleteUserProfile(userId: string): Promise<void> {
+    // You might want to add more logic here, like anonymizing data instead of hard deleting.
+    // For now, we will just delete the user.
+    await storage.deleteUser(userId);
+  }
 }
 
 export const userService = new UserService();

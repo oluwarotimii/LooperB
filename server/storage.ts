@@ -161,6 +161,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.rowCount! > 0;
+  }
+
   async userHasAccessToBusiness(userId: string, businessId: string): Promise<boolean> {
     const [businessUser] = await db
       .select()
@@ -205,6 +210,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(businesses.id, id))
       .returning();
     return business;
+  }
+
+  async deleteBusiness(id: string): Promise<boolean> {
+    const result = await db.delete(businesses).where(eq(businesses.id, id));
+    return result.rowCount! > 0;
   }
 
   async searchBusinesses(query: string, filters?: any): Promise<Business[]> {
@@ -657,6 +667,11 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
+  async deleteMessage(id: string): Promise<boolean> {
+    const result = await db.delete(messages).where(eq(messages.id, id));
+    return result.rowCount! > 0;
+  }
+
   async getMessage(id: string): Promise<Message | undefined> {
     const [message] = await db.select().from(messages).where(eq(messages.id, id));
     return message;
@@ -711,6 +726,16 @@ export class DatabaseStorage implements IStorage {
         eq(notifications.userId, userId),
         eq(notifications.isRead, false)
       ));
+  }
+
+  async getNotification(id: string): Promise<Notification | undefined> {
+    const [notification] = await db.select().from(notifications).where(eq(notifications.id, id));
+    return notification;
+  }
+
+  async deleteNotification(id: string): Promise<boolean> {
+    const result = await db.delete(notifications).where(eq(notifications.id, id));
+    return result.rowCount! > 0;
   }
 
   // Report operations

@@ -137,16 +137,25 @@ export class OrderService {
   async updateOrderStatus(
     orderId: string, 
     status: "confirmed" | "ready_for_pickup" | "completed" | "cancelled",
-    reason?: string
+    reason?: string,
+    userId?: string
   ): Promise<Order> {
+    const order = await storage.getOrder(orderId);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (userId && order.userId !== userId) {
+      throw new Error("You are not authorized to update this order");
+    }
+
     const updateData: Partial<Order> = { status };
 
     if (status === "completed") {
       updateData.completedAt = new Date();
       
       // Award points to user
-      const order = await storage.getOrder(orderId);
-      if (order?.userId) {
+      if (order.userId) {
         const pointsToAward = Math.floor(parseFloat(order.totalAmount) / 100); // 1 point per ₦100
         await storage.addPoints(order.userId, pointsToAward, "order_completion", orderId);
         
@@ -175,12 +184,12 @@ export class OrderService {
       }
     }
 
-    const order = await storage.updateOrder(orderId, updateData);
+    const updatedOrder = await storage.updateOrder(orderId, updateData);
     
     // Send notifications
-    await this.sendOrderNotifications(order, status);
+    await this.sendOrderNotifications(updatedOrder, status);
 
-    return order;
+    return updatedOrder;
   }
 
   async verifyPickup(orderId: string, pickupCode: string): Promise<{ success: boolean; message: string }> {

@@ -239,4 +239,111 @@ router.get('/:businessId/listings', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/businesses/{id}:
+ *   put:
+ *     summary: Update a business
+ *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Business ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               businessName:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               latitude:
+ *                 type: string
+ *               longitude:
+ *                 type: string
+ *               businessType:
+ *                 type: string
+ *                 enum: [restaurant, hotel, bakery, supermarket, cafe, caterer]
+ *               openingHours:
+ *                 type: object
+ *               logo:
+ *                 type: string
+ *                 format: binary
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Business updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Business not found
+ */
+router.put('/:id', authenticateJWT, requireBusinessAccess, upload.fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 },
+]), validateRequest(z.object({
+  businessName: z.string().optional(),
+  description: z.string().optional(),
+  address: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  businessType: z.enum(["restaurant", "hotel", "bakery", "supermarket", "cafe", "caterer"]).optional(),
+  openingHours: z.record(z.any()).optional(),
+})), async (req: any, res) => {
+  try {
+    const logoUrl = req.files?.logo?.[0]?.path;
+    const coverImageUrl = req.files?.coverImage?.[0]?.path;
+    const business = await businessService.updateBusiness(req.params.id, { ...req.body, logoUrl, coverImageUrl });
+    res.json(business);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update business" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/businesses/{id}:
+ *   delete:
+ *     summary: Delete a business
+ *     tags: [Businesses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Business ID
+ *     responses:
+ *       200:
+ *         description: Business deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Business not found
+ */
+router.delete('/:id', authenticateJWT, requireBusinessAccess, async (req: any, res) => {
+  try {
+    await businessService.deleteBusiness(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete business" });
+  }
+});
+
 export default router;

@@ -244,4 +244,50 @@ router.put('/:id/status', authenticateJWT, requireBusinessAccess, validateReques
   }
 });
 
+/**
+ * @swagger
+ * /api/orders/{id}/cancel:
+ *   put:
+ *     summary: Cancel an order (User only)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 description: Reason for cancellation
+ *     responses:
+ *       200:
+ *         description: Order cancelled successfully
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Order not found
+ */
+router.put('/:id/cancel', authenticateJWT, validateRequest(z.object({
+  reason: z.string().optional(),
+})), async (req: any, res) => {
+  try {
+    const order = await orderService.updateOrderStatus(req.params.id, "cancelled", req.body.reason, req.user.id);
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to cancel order" });
+  }
+});
+
 export default router;

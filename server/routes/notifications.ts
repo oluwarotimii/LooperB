@@ -83,4 +83,36 @@ router.put('/read-all', authenticateJWT, async (req: any, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/notifications/{id}:
+ *   delete:
+ *     summary: Delete a notification
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the notification to delete
+ *     responses:
+ *       200:
+ *         description: Notification deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ */
+router.delete('/:id', authenticateJWT, async (req: any, res) => {
+  try {
+    await notificationService.deleteNotification(req.params.id, req.user.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete notification" });
+  }
+});
+
 export default router;

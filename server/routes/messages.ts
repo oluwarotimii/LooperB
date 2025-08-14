@@ -126,4 +126,36 @@ router.put('/:id/read', authenticateJWT, async (req: any, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/messages/{id}:
+ *   delete:
+ *     summary: Delete a message
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the message to delete
+ *     responses:
+ *       200:
+ *         description: Message deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Message not found
+ */
+router.delete('/:id', authenticateJWT, async (req: any, res) => {
+  try {
+    await messageService.deleteMessage(req.params.id, req.user.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete message" });
+  }
+});
+
 export default router;

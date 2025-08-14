@@ -1,6 +1,7 @@
 import { storage } from "../storage";
 import { notificationService } from "./notificationService";
-import type { FoodListing, InsertFoodListing } from "@shared/schema";
+import { geoLocationService } from "../utils/geoLocation";
+import type { FoodListing, InsertFoodListing, Business } from "@shared/schema";
 
 export class ListingService {
   async createListing(listingData: InsertFoodListing & { dietaryTagIds?: string[] }): Promise<FoodListing> {
@@ -41,6 +42,38 @@ export class ListingService {
 
   async getBusinessListings(businessId: string): Promise<FoodListing[]> {
     return await storage.getFoodListingsByBusiness(businessId);
+  }
+
+  async findNearbyListings(
+    lat: number,
+    lon: number,
+    radius: number = 10
+  ): Promise<Array<FoodListing & { distance: number; business: Business }>> {
+    if (!geoLocationService.validateCoordinates(lat, lon)) {
+      throw new Error("Invalid coordinates provided.");
+    }
+
+    const nearbyBusinesses = await storage.findBusinessesNearby(lat, lon, radius);
+
+    if (nearbyBusinesses.length === 0) {
+      return [];
+    }
+
+    const businessIds = nearbyBusinesses.map((b) => b.id);
+    const listings = await storage.getActiveListingsByBusinessIds(businessIds);
+
+    const listingsWithDistance = listings.map((listing) => {
+      const business = nearbyBusinesses.find((b) => b.id === listing.businessId)!;
+      const distance = geoLocationService.calculateDistance(
+        lat,
+        lon,
+        parseFloat(business.latitude!),
+        parseFloat(business.longitude!)
+      );
+      return { ...listing, distance, business };
+    });
+
+    return listingsWithDistance.sort((a, b) => a.distance - b.distance);
   }
 
   async searchListings(filters: any): Promise<FoodListing[]> {

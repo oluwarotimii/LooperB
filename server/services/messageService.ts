@@ -202,9 +202,7 @@ export class MessageService {
       return false;
     }
 
-    // In a real implementation, you might want to soft delete or only hide from user
-    // For now, we'll return true to indicate successful deletion
-    return true;
+    return await storage.deleteMessage(messageId);
   }
 
   async getMessageStatistics(businessId?: string): Promise<any> {
