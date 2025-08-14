@@ -1,0 +1,133 @@
+same error cors? Authentication
+
+
+POST
+/api/auth/register
+Register a new user
+
+
+Parameters
+Cancel
+Reset
+No parameters
+
+Request body
+
+application/json
+Edit Value
+Schema
+{
+  "email": "oluwarotimiadewumi@gmail.com",
+  "password": "password123",
+  "fullName": "Oluwarotimi Adewumi",
+  "phone": "07036109595"
+}
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'POST' \
+  'http://localhost:5000/api/auth/register' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "email": "oluwarotimiadewumi@gmail.com",
+  "password": "password123",
+  "fullName": "Oluwarotimi Adewumi",
+  "phone": "07036109595"
+}'
+Request URL
+http://localhost:5000/api/auth/register
+Server response
+Code	Details
+Undocumented
+Failed to fetch.
+Possible Reasons:
+
+CORS
+Network Failure
+URL scheme must be "http" or "https" for CORS request.
+Responses
+Code	Description	Links
+201	
+User registered successfully
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "user": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "email": "user@example.com",
+    "fullName": "string",
+    "role": "consumer",
+    "isVerified": true,
+    "pointsBalance": 0,
+    "walletBalance": "string",
+    "totalMealsRescued": 0
+  },
+  "tokens": {
+    "accessToken": "string",
+    "refreshToken": "string"
+  }
+}
+No links
+400	
+Validation error or user already exists
+
+
+ChatGPT said:
+That error isn’t Resend’s fault — it’s happening before your backend even runs your registration logic.
+You’re hitting a CORS preflight issue from your frontend or API test tool when trying to call http://localhost:5000/api/auth/register.
+
+Here’s what’s going on:
+
+Why You’re Getting This
+Browser security blocks cross-origin requests unless the backend says it’s allowed.
+
+If your frontend runs on, say, http://localhost:3000, and your backend is http://localhost:5000, the browser considers them different origins.
+
+Before sending your POST, the browser sends an OPTIONS request to check CORS rules.
+
+If your backend doesn’t respond with the right headers, the request is blocked.
+
+Fix (Node.js / Express Example)
+Install CORS middleware:
+
+bash
+Copy
+Edit
+npm install cors
+In your server setup:
+
+javascript
+Copy
+Edit
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+
+// Allow all origins (for dev)
+app.use(cors({
+  origin: '*', // Or restrict to ["http://localhost:3000"]
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+// Your routes here
+app.post('/api/auth/register', (req, res) => {
+  res.status(201).json({ message: 'User registered successfully' });
+});
+
+app.listen(5000, () => console.log('Server running on port 5000'));
+If You’re Testing from Swagger or API Client
+Swagger’s "Try it out" also runs in the browser, so CORS applies.
+
+Postman, curl, or direct terminal requests won’t trigger CORS — so if curl works but Swagger doesn’t, it’s a CORS header issue.

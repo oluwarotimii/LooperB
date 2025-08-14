@@ -15,6 +15,9 @@ export class BusinessService {
     // Update user role
     await storage.updateUser(userId, { role: "business_owner" });
     
+    // Get user details for email
+    const user = await storage.getUser(userId);
+    
     // Send notification
     await notificationService.createNotification({
       userId,
@@ -24,6 +27,20 @@ export class BusinessService {
       relatedEntityId: business.id,
       relatedEntityType: "business",
     });
+
+    // Send business registration email
+    try {
+      if (user) {
+        await emailService.sendBusinessRegistrationEmail(
+          user.email, 
+          user.fullName || 'Business Owner', 
+          business.businessName
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send business registration email:', error);
+      // Don't fail business creation if email fails
+    }
     
     return business;
   }

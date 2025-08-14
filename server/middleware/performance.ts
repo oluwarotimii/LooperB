@@ -1,6 +1,7 @@
 import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 import type { Express, Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
 
@@ -183,8 +184,20 @@ export const cacheControl = (maxAge: number = 0) => {
   };
 };
 
+// CORS middleware
+export const corsMiddleware = cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-production-domain.com'] 
+    : true, // Allow all origins in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200 // For legacy browser support
+});
+
 // Setup all performance middleware
 export const setupPerformanceMiddleware = (app: Express) => {
+  app.use(corsMiddleware);
   app.use(compressionMiddleware);
   app.use(securityMiddleware);
   app.use(requestLogger);

@@ -1,0 +1,40 @@
+Entry Point & First time user experience
+•	Users discover Looper via partner company announcements, billboard ads, or corporate email invitations
+•	Landing page/app intro: “Loop food, save money, Eat well”
+•	Simple registration & optional workplace verification(discount codes)
+•	Onboarding screens: platform benefits, how surplus deals work, trust & food safety messaging
+________________________________________
+Core Experience
+Step 1: Browse deals
+•	Homepage highlights daily/weekly featured deals, gourmet specials and flash sale items
+•	User filter by location, food preference, or time.
+•	Listings show photo, vendor name, pickup window, discount, and remaining inventory.
+
+Step 2: Order Placement
+•	Select items, choose pick-up/delivery (if available), confirm order.
+•	Pay using integrated Paystack; get digital receipt instantly.
+
+Step 3: Fulfilment 
+•	User arrives at partner location, shows QR code or order number
+•	Alternatively, ride is booked for pickup(possibly write to Uber about partnership for delivery.
+•	Sell this in the proposal to the companies telling them that the user coming to the location can also be an opportunity to get them to come to the restaurant and might get them to place an order.
+•	Business scans and mark item as picked up. User collects package
+•	Work out delivery step by step.
+
+Step 4: Feedback & Next steps
+•	Users are urged to rate their experience, leave comments or share photos
+•	Option to save business/item as favourite for one- tap reorder
+•	Immediate post purchase notification: “Smile, you’re doing your part for the planet”, “You just rescued X amount of food”, “Has something told you that you’re a good person today”.
+
+Advanced Features & Edge cases
+•	Chef’s Mystery sauce. (unusual, high value or bespoke surplus offers). This would be a special section where the picture of the chef, his culinary influences would be shown and his mystery sauce background. Eventually, a video of him making the sauce.
+•	Limited early morning push notifications for breakfast. “Surplus brekkie estimate: X “. Will start delivery at 10am. Please note that this could be over or under the estimate. Make an order early to reserve your choice.
+•	Show substitutes if chosen meals run out. Support for payment/fulfilment issues. Users should be able to retry payment/order in case of failed transactions.
+________________________________________
+User journey
+In the heart of Lagos, Ada, a mid-level banker, faces the usual lunchtime conundrum—long queues, high prices, and a craving for something new. By chance, her bank introduces her to Looper: a fresh solution promising “save food, save money.”
+Ada quickly signs up on her phone, attracted by today’s “Hotel Chef’s Special”—a gourmet sauce with a steep discount that lets her enjoy flavors usually reserved for five-star guests. Within minutes, her order is placed, payment confirmed via Paystack, and her pick-up time sealed.
+
+Arriving at the hotel outlet, Ada finds a ready package, her name and QR code greeted with a warm smile. She shares feedback on the dish in-app, effusive over the surprise and quality. Not only does her bank get recognized for corporate sustainability, but Ada feels good for her pocket—and for the knowledge she’s helping turn “waste” into a delicious lunch. That afternoon, she forwards a code to her colleagues —an office-wide rescue of breakfast pastries from a top island hotel is soon in motion.
+
+Meanwhile, the hotel is not only reducing its food waste and demonstrating environmental stewardship, but also earning new revenue and a boost to its brand image—a true win-win, powered by Looper.

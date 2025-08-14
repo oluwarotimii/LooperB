@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class EmailService {
-  private fromEmail = 'noreply@looper.app'; // Change to your verified domain
+  private fromEmail = 'onboarding@resend.dev'; // Using Resend's verified domain for testing
 
   async sendWelcomeEmail(to: string, fullName: string): Promise<void> {
     try {
@@ -28,6 +28,35 @@ export class EmailService {
       });
     } catch (error) {
       console.error('Failed to send welcome email:', error);
+      throw new Error('Email service unavailable');
+    }
+  }
+
+  async sendBusinessRegistrationEmail(to: string, fullName: string, businessName: string): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: this.fromEmail,
+        to,
+        subject: 'Business Registration Received - Looper',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2D5016;">Business Registration Received!</h1>
+            <p>Hello ${fullName},</p>
+            <p>Thank you for registering your business "${businessName}" with Looper!</p>
+            <p>Your business registration is now under review. You'll receive another email within 24-48 hours with the verification status.</p>
+            <p>While you wait, you can:</p>
+            <ul>
+              <li>Complete your business profile</li>
+              <li>Upload your business logo</li>
+              <li>Set up your opening hours</li>
+            </ul>
+            <p><a href="${process.env.FRONTEND_URL}/business/dashboard" style="background-color: #2D5016; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Access Business Dashboard</a></p>
+            <p>Welcome to the food waste reduction movement!<br>The Looper Team</p>
+          </div>
+        `
+      });
+    } catch (error) {
+      console.error('Failed to send business registration email:', error);
       throw new Error('Email service unavailable');
     }
   }
@@ -151,6 +180,44 @@ export class EmailService {
       });
     } catch (error) {
       console.error('Failed to send staff invitation email:', error);
+      throw new Error('Email service unavailable');
+    }
+  }
+
+  async sendBusinessRegistrationEmail(to: string, ownerName: string, businessName: string): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: this.fromEmail,
+        to,
+        subject: 'Business Registration Successful - Looper',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2D5016;">Business Registration Successful!</h1>
+            <p>Hi ${ownerName},</p>
+            <p>Thank you for registering your business "${businessName}" with Looper!</p>
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3>What's Next?</h3>
+              <ul>
+                <li>Your business is now pending verification</li>
+                <li>Our team will review your business within 24-48 hours</li>
+                <li>Once verified, you can start listing surplus food items</li>
+                <li>You'll be notified via email once verification is complete</li>
+              </ul>
+            </div>
+            <p>During the verification process, you can:</p>
+            <ul>
+              <li>Complete your business profile</li>
+              <li>Upload business photos</li>
+              <li>Set up your operating hours</li>
+              <li>Invite staff members</li>
+            </ul>
+            <p><a href="${process.env.FRONTEND_URL}/business/dashboard" style="background-color: #2D5016; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Go to Business Dashboard</a></p>
+            <p>Welcome to the food waste reduction movement!<br>The Looper Team</p>
+          </div>
+        `
+      });
+    } catch (error) {
+      console.error('Failed to send business registration email:', error);
       throw new Error('Email service unavailable');
     }
   }

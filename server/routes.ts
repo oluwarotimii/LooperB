@@ -20,6 +20,11 @@ import { validateRequest, validateQuery } from "./middleware/validation";
 import { requireBusinessAccess, requireRole, authenticateJWT } from "./middleware/auth";
 import { z } from "zod";
 import authRoutes from "./routes/auth";
+import businessRoutes from "./routes/businesses";
+import listingRoutes from "./routes/listings";
+import orderRoutes from "./routes/orders";
+import paymentRoutes from "./routes/payments";
+import reviewRoutes from "./routes/reviews";
 import { registerAdminRoutes } from "./routes/admin";
 import { AuthService } from "./services/authService";
 import { referralService } from "./services/referralService";
@@ -38,6 +43,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Authentication routes
   app.use('/api/auth', authRoutes);
+  
+  // Business routes
+  app.use('/api/businesses', businessRoutes);
+  
+  // Listing routes
+  app.use('/api/listings', listingRoutes);
+  
+  // Order routes
+  app.use('/api/orders', orderRoutes);
+  
+  // Payment routes
+  app.use('/api/payment', paymentRoutes);
+  app.use('/api/wallet', paymentRoutes);
+  
+  // Review routes
+  app.use('/api/reviews', reviewRoutes);
   
   // Admin routes
   const adminRoutes = express.Router();
@@ -190,87 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Business routes
-  app.post('/api/businesses', authenticateJWT, upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'coverImage', maxCount: 1 },
-  ]), validateRequest(z.object({
-    businessName: z.string(),
-    description: z.string().optional(),
-    address: z.string(),
-    latitude: z.string().optional(),
-    longitude: z.string().optional(),
-    businessType: z.enum(["restaurant", "hotel", "bakery", "supermarket", "cafe", "caterer"]),
-    openingHours: z.record(z.any()).optional(),
-  })), async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const logoUrl = req.files?.logo?.[0]?.path;
-      const coverImageUrl = req.files?.coverImage?.[0]?.path;
-      const business = await businessService.createBusiness(userId, { ...req.body, logoUrl, coverImageUrl });
-      res.json(business);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to create business" });
-    }
-  });
-
-  app.get('/api/businesses/my', authenticateJWT, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const businesses = await businessService.getUserBusinesses(userId);
-      res.json(businesses);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch businesses" });
-    }
-  });
-
-  app.get('/api/businesses/:id', async (req, res) => {
-    try {
-      const business = await businessService.getBusinessDetails(req.params.id);
-      if (!business) {
-        return res.status(404).json({ message: "Business not found" });
-      }
-      res.json(business);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch business" });
-    }
-  });
-
-  app.put('/api/businesses/:id', authenticateJWT, requireBusinessAccess, upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'coverImage', maxCount: 1 },
-  ]), validateRequest(z.object({
-    businessName: z.string().optional(),
-    description: z.string().optional(),
-    address: z.string().optional(),
-    latitude: z.string().optional(),
-    longitude: z.string().optional(),
-    openingHours: z.record(z.any()).optional(),
-  })), async (req: any, res) => {
-    try {
-      const logoUrl = req.files?.logo?.[0]?.path;
-      const coverImageUrl = req.files?.coverImage?.[0]?.path;
-      const business = await businessService.updateBusiness(req.params.id, { ...req.body, logoUrl, coverImageUrl });
-      res.json(business);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update business" });
-    }
-  });
-
-  app.get('/api/businesses/search', validateQuery(z.object({
-    q: z.string().optional(),
-    latitude: z.string().optional(),
-    longitude: z.string().optional(),
-    radius: z.string().optional(),
-    businessType: z.string().optional(),
-  })), async (req, res) => {
-    try {
-      const businesses = await businessService.searchBusinesses(req.query);
-      res.json(businesses);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to search businesses" });
-    }
-  });
+  // Staff invitation routes (kept here as they're not in separate file)
 
   app.post('/api/businesses/:id/staff', authenticateJWT, requireBusinessAccess, validateRequest(z.object({
     email: z.string().email(),
@@ -295,27 +236,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Food listing routes
-  app.post('/api/listings', authenticateJWT, requireBusinessAccess, upload.array('media'), validateRequest(z.object({
-    businessId: z.string(),
-    title: z.string(),
-    description: z.string().optional(),
-    listingType: z.enum(["individual", "whoop_bag", "chef_special", "mystery_box"]),
-    originalPrice: z.string(),
-    discountedPrice: z.string(),
-    quantity: z.number(),
-    pickupWindowStart: z.string(),
-    pickupWindowEnd: z.string(),
-    allergenInfo: z.string().optional(),
-    ingredients: z.string().optional(),
-    dietaryTagIds: z.array(z.string()).optional(),
-  })), async (req: any, res) => {
+  // Payment webhook (kept here as it needs special handling)
+  app.post('/api/payments/webhook', async (req, res) => {
     try {
-      const media = req.files?.map((file: any) => ({ url: file.path, type: file.mimetype }));
-      const listing = await listingService.createListing({ ...req.body, media });
-      res.json(listing);
+      await paymentService.handleWebhook(req.body);
+      res.status(200).send('OK');
     } catch (error) {
-      res.status(500).json({ message: "Failed to create listing" });
+      res.status(400).send('Webhook failed');
+    }
+  });
+
+  // Message routes
+  app.get('/api/messages', authenticateJWT, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const messages = await messageService.getUserMessages(userId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
 

@@ -2,7 +2,12 @@ import bcrypt from 'bcrypt';
 import { storage } from '../storage';
 import { generateTokens, verifyRefreshToken } from '../middleware/auth';
 import { authenticateWithGoogle } from '../auth/googleAuth';
+import { EmailService } from './emailService';
+import { BusinessService } from './businessService';
 import type { InsertUser } from '@shared/schema';
+
+const emailService = new EmailService();
+const businessService = new BusinessService();
 
 export class AuthService {
   // Register new user
@@ -40,6 +45,14 @@ export class AuthService {
       lastActiveAt: new Date()
     });
 
+    // Send welcome email
+    try {
+      await emailService.sendWelcomeEmail(newUser.email, newUser.fullName || 'User');
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+      // Don't fail registration if email fails
+    }
+
     return {
       user: {
         id: newUser.id,
@@ -47,6 +60,86 @@ export class AuthService {
         fullName: newUser.fullName,
         role: newUser.role,
         isVerified: newUser.isVerified,
+      },
+      tokens,
+    };
+  }
+
+  // Register business owner with business
+  async registerBusinessOwner(userData: {
+    email: string;
+    password: string;
+    fullName: string;
+    phone?: string;
+    businessName: string;
+    businessType: string;
+    address: string;
+    description?: string;
+  }) {
+    // Check if user already exists
+    const existingUser = await storage.getUserByEmail(userData.email);
+    if (existingUser) {
+      throw new Error('User already exists with this email');
+    }
+
+    // Hash password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+
+    // Create user as business owner
+    const newUser = await storage.createUser({
+      email: userData.email,
+      password: hashedPassword,
+      fullName: userData.fullName,
+      phone: userData.phone,
+      role: 'business_owner',
+      isVerified: false,
+      referralCode: this.generateReferralCode(),
+    } as InsertUser);
+
+    // Create business
+    const business = await businessService.createBusiness(newUser.id, {
+      businessName: userData.businessName,
+      description: userData.description || '',
+      address: userData.address,
+      businessType: userData.businessType as any,
+      verificationStatus: 'pending',
+      isActive: true,
+    } as any);
+
+    // Generate tokens
+    const tokens = generateTokens(newUser.id);
+
+    // Update refresh token in database
+    await storage.updateUser(newUser.id, { 
+      refreshToken: tokens.refreshToken,
+      lastActiveAt: new Date()
+    });
+
+    // Send welcome and business registration emails
+    try {
+      await emailService.sendWelcomeEmail(newUser.email, newUser.fullName || 'Business Owner');
+      await emailService.sendBusinessRegistrationEmail(
+        newUser.email, 
+        newUser.fullName || 'Business Owner', 
+        business.businessName
+      );
+    } catch (error) {
+      console.error('Failed to send emails:', error);
+    }
+
+    return {
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        fullName: newUser.fullName,
+        role: newUser.role,
+        isVerified: newUser.isVerified,
+      },
+      business: {
+        id: business.id,
+        businessName: business.businessName,
+        verificationStatus: business.verificationStatus,
       },
       tokens,
     };

@@ -14,6 +14,17 @@ const registerSchema = z.object({
   phone: z.string().optional(),
 });
 
+const businessRegisterSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  fullName: z.string().min(2),
+  phone: z.string().optional(),
+  businessName: z.string().min(2),
+  businessType: z.enum(['restaurant', 'hotel', 'bakery', 'supermarket', 'cafe', 'caterer']),
+  address: z.string().min(5),
+  description: z.string().optional(),
+});
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
@@ -32,7 +43,7 @@ const resetPasswordSchema = z.object({
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new consumer user
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -120,6 +131,67 @@ router.post('/register', async (req, res) => {
  *       401:
  *         description: Invalid credentials
  */
+/**
+ * @swagger
+ * /api/auth/register-business:
+ *   post:
+ *     summary: Register a new business owner with business
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - fullName
+ *               - businessName
+ *               - businessType
+ *               - address
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *               fullName:
+ *                 type: string
+ *                 minLength: 2
+ *               phone:
+ *                 type: string
+ *               businessName:
+ *                 type: string
+ *                 minLength: 2
+ *               businessType:
+ *                 type: string
+ *                 enum: [restaurant, hotel, bakery, supermarket, cafe, caterer]
+ *               address:
+ *                 type: string
+ *                 minLength: 5
+ *               description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Business owner registered successfully
+ *       400:
+ *         description: Validation error or user already exists
+ */
+router.post('/register-business', async (req, res) => {
+  try {
+    const validatedData = businessRegisterSchema.parse(req.body);
+    const result = await authService.registerBusinessOwner(validatedData);
+    res.status(201).json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation error', details: error.errors });
+    }
+    res.status(400).json({ error: (error as Error).message });
+  }
+});
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
