@@ -93,6 +93,64 @@ router.get('/search', validateQuery(z.object({
 
 /**
  * @swagger
+ * /api/listings/nearby:
+ *   get:
+ *     summary: Find listings near a specific location
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: float
+ *         description: User's latitude
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *           format: float
+ *         description: User's longitude
+ *       - in: query
+ *         name: radius
+ *         schema:
+ *           type: number
+ *           format: integer
+ *           default: 10
+ *         description: Search radius in kilometers
+ *     responses:
+ *       200:
+ *         description: A list of listings sorted by distance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ListingWithDistance'
+ *       400:
+ *         description: Invalid query parameters
+ */
+router.get('/nearby', validateQuery(z.object({
+  lat: z.string(),
+  lon: z.string(),
+  radius: z.string().optional(),
+})), async (req, res) => {
+  try {
+    const { lat, lon, radius } = req.query;
+    const listings = await listingService.findNearbyListings(
+      parseFloat(lat as string),
+      parseFloat(lon as string),
+      radius ? parseInt(radius as string, 10) : undefined
+    );
+    res.json(listings);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "Failed to find nearby listings" });
+  }
+});
+
+/**
+ * @swagger
  * /api/listings/{id}:
  *   get:
  *     summary: Get listing details
