@@ -767,3 +767,17 @@
 {"timestamp":"2025-08-14T14:41:52.589Z","level":"INFO","message":"API Request: POST /","metadata":{"method":"POST","path":"/","userId":"9be71d2b-1746-4e6c-b047-e13b2cafb92b","responseTime":703,"statusCode":400}}
 {"timestamp":"2025-08-14T14:48:10.193Z","level":"INFO","message":"API Request: POST /register","metadata":{"method":"POST","path":"/register","responseTime":3258,"statusCode":201}}
 {"timestamp":"2025-08-14T14:48:10.204Z","level":"WARN","message":"Slow API request","metadata":{"method":"POST","path":"/register","duration":"3269.097ms"}}
+{"timestamp":"2025-08-14T19:04:16.491Z","level":"INFO","message":"Performance middleware configured"}
+{"timestamp":"2025-08-14T19:04:16.995Z","level":"INFO","message":"Looper server started on port 5000","metadata":{"environment":"development","port":5000,"timestamp":"2025-08-14T19:04:16.995Z"}}
+{"timestamp":"2025-08-14T19:04:31.314Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":24,"statusCode":304}}
+{"timestamp":"2025-08-14T19:04:31.882Z","level":"INFO","message":"API Request: GET /swagger-ui.css","metadata":{"method":"GET","path":"/swagger-ui.css","responseTime":41,"statusCode":200}}
+{"timestamp":"2025-08-14T19:04:32.016Z","level":"INFO","message":"API Request: GET /swagger-ui-standalone-preset.js","metadata":{"method":"GET","path":"/swagger-ui-standalone-preset.js","responseTime":99,"statusCode":200}}
+{"timestamp":"2025-08-14T19:04:32.149Z","level":"INFO","message":"API Request: GET /swagger-ui-init.js","metadata":{"method":"GET","path":"/swagger-ui-init.js","responseTime":1,"statusCode":304}}
+{"timestamp":"2025-08-14T19:04:32.420Z","level":"INFO","message":"API Request: GET /swagger-ui-bundle.js","metadata":{"method":"GET","path":"/swagger-ui-bundle.js","responseTime":359,"statusCode":200}}
+{"timestamp":"2025-08-14T19:04:37.206Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":49,"statusCode":200}}
+{"timestamp":"2025-08-14T19:04:37.945Z","level":"INFO","message":"API Request: GET /favicon-32x32.png","metadata":{"method":"GET","path":"/favicon-32x32.png","responseTime":3,"statusCode":304}}
+{"timestamp":"2025-08-14T19:04:38.110Z","level":"INFO","message":"API Request: GET /","metadata":{"method":"GET","path":"/","responseTime":15,"statusCode":200}}
+{"timestamp":"2025-08-14T19:12:35.237Z","level":"INFO","message":"API Request: POST /register","metadata":{"method":"POST","path":"/register","responseTime":1662,"statusCode":400}}
+{"timestamp":"2025-08-14T19:12:35.308Z","level":"WARN","message":"Slow API request","metadata":{"method":"POST","path":"/register","duration":"1732.4424ms"}}
+{"timestamp":"2025-08-15T08:08:23.388Z","level":"INFO","message":"API Request: POST /register","metadata":{"method":"POST","path":"/register","responseTime":3640,"statusCode":201}}
+{"timestamp":"2025-08-15T08:08:23.397Z","level":"WARN","message":"Slow API request","metadata":{"method":"POST","path":"/register","duration":"3647.3022ms"}}
