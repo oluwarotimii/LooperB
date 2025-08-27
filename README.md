@@ -12,7 +12,7 @@ Looper is a full-stack application designed to address food waste by connecting 
 - **Reviews and Ratings:** A feedback system to maintain quality and trust.
 - **Digital Wallet and Points:** A loyalty system to reward users.
 - **Environmental Impact Tracking:** Users can see the positive environmental impact of their purchases.
-- **Admin Dashboard:** A comprehensive dashboard for platform management.
+- **Admin Dashboard:** A comprehensive dashboard for platform management..
 
 ## Technology Stack
 
