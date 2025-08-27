@@ -72,7 +72,7 @@ export class BusinessService {
       return await storage.searchBusinesses(filters.q, filters);
     }
 
-    return [];
+    return await storage.getAllBusinesses();
   }
 
   async verifyBusiness(businessId: string, approved: boolean, reason?: string): Promise<void> {

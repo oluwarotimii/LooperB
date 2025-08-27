@@ -5,3 +5,7 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
+
+# Temporary data files
+temp_business_data.json
+temp_consumer_data.json

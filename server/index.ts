@@ -12,6 +12,16 @@ const app = express();
 setupPerformanceMiddleware(app);
 
 app.use(express.json({ limit: '10mb' }));
+app.use((req, res, next) => {
+  let data = '';
+  req.on('data', chunk => {
+    data += chunk;
+  });
+  req.on('end', () => {
+    console.log('Raw Request Body:', data);
+    next();
+  });
+});
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {

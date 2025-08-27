@@ -58,6 +58,7 @@ export interface IStorage {
   getBusinessesByLocation(lat: number, lng: number, radius: number): Promise<Business[]>;
   updateBusiness(id: string, updates: Partial<Business>): Promise<Business>;
   searchBusinesses(query: string, filters?: any): Promise<Business[]>;
+  getAllBusinesses(): Promise<Business[]>;
 
   // Business user operations
   addBusinessUser(userId: string, businessId: string, role: "owner" | "manager" | "staff"): Promise<BusinessUser>;
@@ -184,6 +185,27 @@ export class DatabaseStorage implements IStorage {
   async getBusiness(id: string): Promise<Business | undefined> {
     const [business] = await db.select().from(businesses).where(eq(businesses.id, id));
     return business;
+  }
+
+  async addBusinessUser(userId: string, businessId: string, role: "owner" | "manager" | "staff"): Promise<BusinessUser> {
+    const [businessUser] = await db.insert(businessUsers).values({ userId, businessId, role }).returning();
+    return businessUser;
+  }
+
+  async getBusinessUsers(businessId: string): Promise<BusinessUser[]> {
+    return await db.select().from(businessUsers).where(eq(businessUsers.businessId, businessId));
+  }
+
+  async getUserBusinesses(userId: string): Promise<Business[]> {
+    const result = await db.select({ business: businesses })
+      .from(businessUsers)
+      .innerJoin(businesses, eq(businessUsers.businessId, businesses.id))
+      .where(eq(businessUsers.userId, userId));
+    return result.map(r => r.business);
+  }
+
+  async getAllBusinesses(): Promise<Business[]> {
+    return await db.select().from(businesses);
   }
 
   
