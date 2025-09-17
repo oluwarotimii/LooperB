@@ -41,6 +41,7 @@ import {
 import { db } from "./db";
 import { eq, and, or, desc, asc, sql, like, ilike, gte, lte, inArray } from "drizzle-orm";
 import { passwordResets, staffInvitations } from "@shared/schema";
+import { geoLocationService } from "./utils/geoLocation";
 
 export interface IStorage {
   // User operations
@@ -57,6 +58,7 @@ export interface IStorage {
   getBusinessesByLocation(lat: number, lng: number, radius: number): Promise<Business[]>;
   updateBusiness(id: string, updates: Partial<Business>): Promise<Business>;
   searchBusinesses(query: string, filters?: any): Promise<Business[]>;
+  getAllBusinesses(): Promise<Business[]>;
 
   // Business user operations
   addBusinessUser(userId: string, businessId: string, role: "owner" | "manager" | "staff"): Promise<BusinessUser>;
@@ -185,123 +187,63 @@ export class DatabaseStorage implements IStorage {
     return business;
   }
 
-  async getBusinessesByLocation(lat: number, lng: number, radius: number): Promise<Business[]> {
-    // Simplified proximity search - in production, use PostGIS
-    const businessList = await db
-      .select()
-      .from(businesses)
-      .where(eq(businesses.isActive, true));
-    
-    return businessList.filter(business => {
-      if (!business.latitude || !business.longitude) return false;
-      const distance = this.calculateDistance(
-        lat, lng, 
-        parseFloat(business.latitude), 
-        parseFloat(business.longitude)
-      );
-      return distance <= radius;
-    });
-  }
-
-  async updateBusiness(id: string, updates: Partial<Business>): Promise<Business> {
-    const [business] = await db
-      .update(businesses)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(businesses.id, id))
-      .returning();
-    return business;
-  }
-
-  async deleteBusiness(id: string): Promise<boolean> {
-    const result = await db.delete(businesses).where(eq(businesses.id, id));
-    return result.rowCount! > 0;
-  }
-
-  async searchBusinesses(query: string, filters?: any): Promise<Business[]> {
-    let queryBuilder = db
-      .select()
-      .from(businesses)
-      .where(eq(businesses.isActive, true));
-
-    if (query) {
-      queryBuilder = queryBuilder.where(ilike(businesses.businessName, `%${query}%`));
-    }
-
-    if (filters?.businessType) {
-      queryBuilder = queryBuilder.where(eq(businesses.businessType, filters.businessType));
-    }
-
-    return await queryBuilder.orderBy(desc(businesses.averageRating));
-  }
-
-  async searchBusinessesFullText(query: string, filters?: any): Promise<Business[]> {
-    // This is a simplified full-text search. For a robust solution, consider PostgreSQL's tsvector and tsquery.
-    // For now, it will perform a case-insensitive LIKE search on businessName and description.
-    let queryBuilder = db
-      .select()
-      .from(businesses)
-      .where(eq(businesses.isActive, true));
-
-    if (query) {
-      queryBuilder = queryBuilder.where(or(
-        ilike(businesses.businessName, `%${query}%`),
-        ilike(businesses.description, `%${query}%`)
-      ));
-    }
-
-    if (filters?.businessType) {
-      queryBuilder = queryBuilder.where(eq(businesses.businessType, filters.businessType));
-    }
-
-    return await queryBuilder.orderBy(desc(businesses.averageRating));
-  }
-
-  // Business user operations
   async addBusinessUser(userId: string, businessId: string, role: "owner" | "manager" | "staff"): Promise<BusinessUser> {
-    const [businessUser] = await db
-      .insert(businessUsers)
-      .values({ userId, businessId, role })
-      .returning();
+    const [businessUser] = await db.insert(businessUsers).values({ userId, businessId, role }).returning();
     return businessUser;
   }
 
   async getBusinessUsers(businessId: string): Promise<BusinessUser[]> {
-    return await db
-      .select()
-      .from(businessUsers)
-      .where(eq(businessUsers.businessId, businessId));
+    return await db.select().from(businessUsers).where(eq(businessUsers.businessId, businessId));
   }
 
   async getUserBusinesses(userId: string): Promise<Business[]> {
-    const result = await db
-      .select({
-        business: businesses,
-        role: businessUsers.role,
-      })
+    const result = await db.select({ business: businesses })
       .from(businessUsers)
       .innerJoin(businesses, eq(businessUsers.businessId, businesses.id))
       .where(eq(businessUsers.userId, userId));
-    
     return result.map(r => r.business);
   }
 
-  // Food listing operations
-  async createFoodListing(listing: InsertFoodListing): Promise<FoodListing> {
-    const [newListing] = await db.insert(foodListings).values(listing).returning();
-    return newListing;
+  async getAllBusinesses(): Promise<Business[]> {
+    return await db.select().from(businesses);
   }
 
-  async getFoodListing(id: string): Promise<FoodListing | undefined> {
-    const [listing] = await db.select().from(foodListings).where(eq(foodListings.id, id));
-    return listing;
+  
+
+  async findBusinessesNearby(
+    lat: number,
+    lon: number,
+    radius: number
+  ): Promise<Business[]> {
+    const boundingBox = geoLocationService.getBoundingBox(lat, lon, radius);
+
+    return await db
+      .select()
+      .from(businesses)
+      .where(
+        and(
+          eq(businesses.isActive, true),
+          gte(businesses.latitude, boundingBox.minLat.toString()),
+          lte(businesses.latitude, boundingBox.maxLat.toString()),
+          gte(businesses.longitude, boundingBox.minLon.toString()),
+          lte(businesses.longitude, boundingBox.maxLon.toString())
+        )
+      );
   }
 
-  async getFoodListingsByBusiness(businessId: string): Promise<FoodListing[]> {
+  async getActiveListingsByBusinessIds(businessIds: string[]): Promise<FoodListing[]> {
+    if (businessIds.length === 0) {
+      return [];
+    }
     return await db
       .select()
       .from(foodListings)
-      .where(eq(foodListings.businessId, businessId))
-      .orderBy(desc(foodListings.createdAt));
+      .where(
+        and(
+          inArray(foodListings.businessId, businessIds),
+          eq(foodListings.status, "active")
+        )
+      );
   }
 
   async searchFoodListings(filters: any): Promise<FoodListing[]> {
