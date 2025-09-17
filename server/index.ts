@@ -15,6 +15,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
+  logger.info(">>> Top-level Middleware reached:", { method: req.method, url: req.url });
+  next();
+});
+
+app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;

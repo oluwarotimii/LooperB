@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
+import { logger } from '../utils/logger'; // Import the logger
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -10,16 +11,23 @@ export interface AuthRequest extends Request {
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
 export const authenticateJWT = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
-
   try {
+    logger.info('AuthMiddleware: authenticateJWT entered'); // Added this line
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    logger.info('AuthMiddleware: Received token:', { token });
+
+    if (!token) {
+      return res.status(401).json({ error: 'Access token required' });
+    }
+
     const decoded = jwt.verify(token, JWT_SECRET) as any;
+    logger.info('AuthMiddleware: Decoded token:', { decoded });
+    logger.info('AuthMiddleware: Decoded userId:', { userId: decoded.userId });
+
     const user = await storage.getUser(decoded.userId);
+    logger.info('AuthMiddleware: User from storage:', { user: user ? user.id : 'not found' });
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
@@ -27,8 +35,10 @@ export const authenticateJWT = async (req: AuthRequest, res: Response, next: Nex
 
     req.user = user;
     req.userId = user.id;
+    logger.info('AuthMiddleware: req.userId set to:', { userId: req.userId });
     next();
   } catch (error) {
+    logger.error('AuthMiddleware: Token verification failed or early error:', error);
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };

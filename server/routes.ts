@@ -17,6 +17,8 @@ import generalRoutes from "./routes/general";
 import { registerAdminRoutes } from "./routes/admin";
 import { AuthService } from "./services/authService";
 import path from 'path';
+import { logger } from './utils/logger';
+import { authenticateJWT } from './middleware/auth'; // Import authenticateJWT
 
 const authService = new AuthService();
 
@@ -29,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API routes
   app.use('/api/auth', authRoutes);
-  app.use('/api/businesses', businessRoutes);
+  app.use('/api/businesses', authenticateJWT, businessRoutes);
   app.use('/api/listings', listingRoutes);
   app.use('/api/orders', orderRoutes);
   app.use('/api/payment', paymentRoutes);

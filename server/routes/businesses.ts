@@ -5,6 +5,7 @@ import { listingService } from '../services/listingService';
 import { validateRequest, validateQuery } from '../middleware/validation';
 import { authenticateJWT, requireBusinessAccess } from '../middleware/auth';
 import { upload } from '../utils/fileUpload';
+import { logger } from '../utils/logger'; // Added this line
 
 const router = Router();
 
@@ -70,6 +71,18 @@ router.get('/search', validateQuery(z.object({
     res.json(businesses);
   } catch (error) {
     res.status(500).json({ message: "Failed to search businesses" });
+  }
+});
+
+router.get('/my', authenticateJWT, async (req: any, res) => {
+  logger.info('Businesses Route: Handler entered', { userId: req.userId });
+  try {
+    const userId = req.user.id;
+    const businesses = await businessService.getUserBusinesses(userId);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(businesses));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch businesses" });
   }
 });
 
@@ -198,13 +211,7 @@ router.post('/', authenticateJWT, upload.fields([
  *                 $ref: '#/components/schemas/Business'
  */
 router.get('/my', authenticateJWT, async (req: any, res) => {
-  try {
-    const userId = req.user.id;
-    const businesses = await businessService.getUserBusinesses(userId);
-    res.json(businesses);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch businesses" });
-  }
+  res.send('Handler reached!');
 });
 
 /**
