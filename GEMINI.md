@@ -31,6 +31,9 @@ This file will be used to track the progress of our work together.
   - **Status:** Successfully tested and returning business details for the authenticated user.
   - **Action:** Resolved issues with middleware execution, token handling, and route matching.
 
+- **Endpoint:** `GET /api/businesses/{id}`
+  - **Status:** Successfully tested and returning details for a specific business ID.
+
 ## Current Limitation:
 
 - **Issue:** Still unable to reliably send HTTP requests that require request bodies or complex headers using `curl` (due to persistent shell escaping issues on the user's system) or `web_fetch` (due to an internal tool execution error or design limitation for `localhost`).

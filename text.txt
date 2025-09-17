@@ -1,7 +1,0 @@
-curl -X POST http://localhost:5000/api/auth/register-business -H "Content-Type: application/json" -d '{"email": "business.owner@example.com", "password": "SecurePassword123!", "fullName": "Business Owner Name", "businessName": "My Awesome Business", "businessType": "restaurant", "address": "123 Main St, Anytown, USA", "phone": "555-123-4567", "description": "A fantastic place to eat!"}'
-
-curl http://localhost:5000/api/health
-
-curl -X GET http://localhost:5000/api/businesses/my -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMWEzNGNjYi0wNWE3LTQyYzItYTZhMi1hYjM0OGI1N2U3MGYiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzU4MTEzNzY3LCJleHAiOjE3NTgxMTQ2Njd9.AGwFpZaX10FCgoYfT4gq55egaogEZvTiRwSRTWgPjN0"
-
-curl -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d '{"email": "business.owner@example.com", "password": "SecurePassword123!"}'

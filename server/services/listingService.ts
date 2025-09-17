@@ -1,9 +1,16 @@
-import { storage } from "../storage";
+
+
+import { IStorage, storage } from "../storage";
 import { notificationService } from "./notificationService";
 import { geoLocationService } from "../utils/geoLocation";
 import type { FoodListing, InsertFoodListing, Business } from "@shared/schema";
 
 export class ListingService {
+  private storage: IStorage;
+
+  constructor(storage: IStorage) {
+    this.storage = storage;
+  }
   async createListing(listingData: InsertFoodListing & { dietaryTagIds?: string[] }): Promise<FoodListing> {
     const { dietaryTagIds, ...listingInfo } = listingData;
     
@@ -19,7 +26,7 @@ export class ListingService {
     );
 
     // Set available quantity to initial quantity
-    const listing = await storage.createFoodListing({
+    const listing = await this.storage.createFoodListing({
       ...listingInfo,
       availableQuantity: listingInfo.quantity,
       discountedPrice: calculatedDiscountedPrice.toString(),
@@ -27,21 +34,20 @@ export class ListingService {
 
     // Add dietary tags if provided
     if (dietaryTagIds && dietaryTagIds.length > 0) {
-      await storage.addListingDietaryTags(listing.id, dietaryTagIds);
+      await this.storage.addListingDietaryTags(listing.id, dietaryTagIds);
     }
 
-    // Notify nearby users about new listing
-    await this.notifyNearbyUsers(listing);
+    
 
     return listing;
   }
 
   async getListingDetails(listingId: string): Promise<FoodListing | null> {
-    return await storage.getFoodListing(listingId);
+    return await this.storage.getFoodListing(listingId);
   }
 
   async getBusinessListings(businessId: string): Promise<FoodListing[]> {
-    return await storage.getFoodListingsByBusiness(businessId);
+    return await this.storage.getFoodListingsByBusiness(businessId);
   }
 
   async findNearbyListings(
@@ -53,14 +59,14 @@ export class ListingService {
       throw new Error("Invalid coordinates provided.");
     }
 
-    const nearbyBusinesses = await storage.findBusinessesNearby(lat, lon, radius);
+    const nearbyBusinesses = await this.storage.findBusinessesNearby(lat, lon, radius);
 
     if (nearbyBusinesses.length === 0) {
       return [];
     }
 
     const businessIds = nearbyBusinesses.map((b) => b.id);
-    const listings = await storage.getActiveListingsByBusinessIds(businessIds);
+    const listings = await this.storage.getActiveListingsByBusinessIds(businessIds);
 
     const listingsWithDistance = listings.map((listing) => {
       const business = nearbyBusinesses.find((b) => b.id === listing.businessId)!;
@@ -80,7 +86,7 @@ export class ListingService {
     const searchFilters: any = {};
 
     if (filters.q) {
-      return await storage.searchFoodListingsFullText(filters.q, filters);
+      return await this.storage.searchFoodListingsFullText(filters.q, filters);
     }
 
     if (filters.maxPrice) {
@@ -99,7 +105,7 @@ export class ListingService {
       searchFilters.expiringBefore = new Date(Date.now() + 24 * 60 * 60 * 1000); // Next 24 hours
     }
 
-    const listings = await storage.searchFoodListings(searchFilters);
+    const listings = await this.storage.searchFoodListings(searchFilters);
 
     // Apply location-based filtering if coordinates provided
     if (filters.latitude && filters.longitude) {
@@ -114,7 +120,7 @@ export class ListingService {
   async updateListing(listingId: string, updates: Partial<FoodListing>): Promise<FoodListing> {
     // Recalculate dynamic discounted price if relevant fields are updated
     if (updates.originalPrice || updates.quantity || updates.minQuantityForDiscount || updates.bulkDiscountPercentage || updates.pickupWindowEnd) {
-      const existingListing = await storage.getFoodListing(listingId);
+      const existingListing = await this.storage.getFoodListing(listingId);
       if (existingListing) {
         const newOriginalPrice = parseFloat(updates.originalPrice?.toString() || existingListing.originalPrice);
         const newDiscountedPrice = parseFloat(updates.discountedPrice?.toString() || existingListing.discountedPrice);
@@ -137,11 +143,11 @@ export class ListingService {
       }
     }
 
-    const listing = await storage.updateFoodListing(listingId, updates);
+    const listing = await this.storage.updateFoodListing(listingId, updates);
 
     // If quantity was updated, check if it's sold out
     if (updates.availableQuantity !== undefined && updates.availableQuantity === 0) {
-      await storage.updateFoodListing(listingId, { status: "sold_out" });
+      await this.storage.updateFoodListing(listingId, { status: "sold_out" });
     }
 
     return listing;
@@ -149,11 +155,11 @@ export class ListingService {
 
   async deleteListing(listingId: string): Promise<boolean> {
     // First check if there are pending orders for this listing
-    const listing = await storage.getFoodListing(listingId);
+    const listing = await this.storage.getFoodListing(listingId);
     if (!listing) return false;
 
     // Cancel the listing instead of deleting if there are orders
-    await storage.updateFoodListing(listingId, { 
+    await this.storage.updateFoodListing(listingId, { 
       status: "cancelled",
       updatedAt: new Date()
     });
@@ -162,13 +168,13 @@ export class ListingService {
   }
 
   async reserveItems(listingId: string, quantity: number): Promise<boolean> {
-    const listing = await storage.getFoodListing(listingId);
+    const listing = await this.storage.getFoodListing(listingId);
     if (!listing || listing.availableQuantity < quantity) {
       return false;
     }
 
     const newAvailableQuantity = listing.availableQuantity - quantity;
-    await storage.updateFoodListing(listingId, {
+    await this.storage.updateFoodListing(listingId, {
       availableQuantity: newAvailableQuantity,
       status: newAvailableQuantity === 0 ? "sold_out" : listing.status,
     });
@@ -177,7 +183,7 @@ export class ListingService {
   }
 
   async releaseReservedItems(listingId: string, quantity: number): Promise<void> {
-    const listing = await storage.getFoodListing(listingId);
+    const listing = await this.storage.getFoodListing(listingId);
     if (!listing) return;
 
     const newAvailableQuantity = Math.min(
@@ -185,7 +191,7 @@ export class ListingService {
       listing.quantity
     );
 
-    await storage.updateFoodListing(listingId, {
+    await this.storage.updateFoodListing(listingId, {
       availableQuantity: newAvailableQuantity,
       status: newAvailableQuantity > 0 ? "active" : listing.status,
     });
@@ -193,14 +199,14 @@ export class ListingService {
 
   async getExpiringListings(hours: number = 2): Promise<FoodListing[]> {
     const expiryTime = new Date(Date.now() + hours * 60 * 60 * 1000);
-    return await storage.searchFoodListings({
+    return await this.storage.searchFoodListings({
       status: "active",
       expiringBefore: expiryTime,
     });
   }
 
   async markAsExpired(listingId: string): Promise<void> {
-    await storage.updateFoodListing(listingId, {
+    await this.storage.updateFoodListing(listingId, {
       status: "expired",
       updatedAt: new Date(),
     });
@@ -292,11 +298,11 @@ export class ListingService {
   }
 
   async getListingsByCategory(businessType: string): Promise<FoodListing[]> {
-    return await storage.searchFoodListings({
+    return await this.storage.searchFoodListings({
       businessType,
       status: "active",
     });
   }
 }
 
-export const listingService = new ListingService();
+export const listingService = new ListingService(storage);
